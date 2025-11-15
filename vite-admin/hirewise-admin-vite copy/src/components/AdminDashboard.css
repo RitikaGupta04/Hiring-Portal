@@ -89,13 +89,10 @@ th, td {
   padding: 12px;
   text-align: left;
   border-bottom: 1px solid #ddd;
-  font-size: 23px;
 }
 
 th {
   background-color: #f5f5f5;
-  font-size: 23px;
-  font-weight: 600;
 }
 
 .view-btn {

@@ -597,9 +597,15 @@ class ScoringService {
   async getTopRankedApplications(department = null, position = null, limit = 10) {
     let query = supabase
       .from('faculty_applications')
-      .select('*')
+      .select(`
+        *,
+        research_info (
+          scopus_id,
+          scopus_general_papers,
+          conference_papers
+        )
+      `)
       .not('score', 'is', null)
-      .order('score', { ascending: false })
       .limit(limit);
 
     if (department) {
@@ -612,7 +618,19 @@ class ScoringService {
 
     const { data, error } = await query;
     if (error) throw error;
-    return data;
+    
+    // Sort by total Scopus papers (general + conference), then by citations
+    const sorted = (data || []).sort((a, b) => {
+      const aScopusPapers = (a.research_info?.[0]?.scopus_general_papers || 0) + 
+                            (a.research_info?.[0]?.conference_papers || 0);
+      const bScopusPapers = (b.research_info?.[0]?.scopus_general_papers || 0) + 
+                            (b.research_info?.[0]?.conference_papers || 0);
+      
+      // Sort by total Scopus papers
+      return bScopusPapers - aScopusPapers;
+    });
+    
+    return sorted;
   }
 }
 

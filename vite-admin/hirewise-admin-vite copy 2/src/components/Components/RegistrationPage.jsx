@@ -8,8 +8,8 @@ import { COUNTRY_CODES } from '../../lib/country-codes';
 
 const bulletIcons = [
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="9" fill="#0E76A8"/><path d="M5.5 9.5L8 12l4-4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
-  <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="9" fill="#0E76A8"/><path d="M5.5 9.5L8 12l4-4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
-  <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="9" fill="#0E76A8"/><path d="M5.5 9.5L8 12l4-4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect width="18" height="18" rx="9" fill="#0E76A8"/><path d="M5.5 9.5L8 12l4-4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect width="18" height="18" rx="9" fill="#0E76A8"/><circle cx="9" cy="9" r="4" fill="#fff"/></svg>
 ];
 
 const bullets = [
@@ -164,6 +164,7 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
         <div className="figma-left">
           <img src="/image%202.png" alt="BML Munjal University" className="figma-logo" />
           <div className="figma-hirewise">HIREWISE</div>
+          <div className="figma-adm">Admissions 2025</div>
           <h1 className="figma-heading">APPLICATIONS FOR FACULTY & STAFF POSITIONS — NOW OPEN</h1>
           <div className="figma-italic-row">
             <span className="figma-italic-bar"></span>
@@ -220,69 +221,58 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
               <form className="figma-form" onSubmit={handleRegistrationSubmit} autoComplete="off">
                 {/* Name */}
                 <div className="figma-form-group">
-                  <label htmlFor="name" className="figma-label-blue">Full Name</label>
                   <div className={`figma-float-label ${form.name ? "filled" : ""}`}>
                     <input className="figma-input" type="text" name="name" id="name" value={form.name} onChange={handleChange} onFocus={() => handleFocus("name")} autoComplete="off" placeholder=" " />
+                    <label htmlFor="name">Full Name</label>
                   </div>
                   <div className="figma-warning">{warning.name && !isFieldEnabled("name") && "⚠ Please fill out the previous field first."}</div>
                   {touched.name && fieldErrors.name && typeof fieldErrors.name === 'string' && <div className="figma-error">{fieldErrors.name}</div>}
                 </div>
                 {/* Email */}
                 <div className="figma-form-group">
-                  <div className="figma-input-with-label">
-                    <label htmlFor="email" className="figma-label-blue">Email Address</label>
-                    <div className={`figma-float-label ${form.email ? "filled" : ""}`}>
-                      <input className="figma-input" type="email" name="email" id="email" value={form.email} onChange={handleChange} onFocus={() => handleFocus("email")} disabled={!isFieldEnabled("email")} autoComplete="off" placeholder=" " />
-                    </div>
+                  <div className={`figma-float-label ${form.email ? "filled" : ""}`}>
+                    <input className="figma-input" type="email" name="email" id="email" value={form.email} onChange={handleChange} onFocus={() => handleFocus("email")} disabled={!isFieldEnabled("email")} autoComplete="off" placeholder=" " />
+                    <label htmlFor="email">Email Address</label>
                   </div>
                   <div className="figma-warning">{warning.email && !isFieldEnabled("email") && "⚠ Please fill out the previous field first."}</div>
                   {touched.email && fieldErrors.email && typeof fieldErrors.email === 'string' && <div className="figma-error">{fieldErrors.email}</div>}
                 </div>
                 {/* Phone */}
-                <div className="figma-form-group">
-                  <div className="figma-phone-row">
-                    <div className="figma-country-code">
-                      <label htmlFor="countryCode" className="figma-label-blue">Country Code</label>
-                      <select
-                        className="figma-country-select"
-                        name="countryCode"
-                        id="countryCode"
-                        value={form.countryCode}
-                        onChange={handleChange}
-                      >
-                        {COUNTRY_CODES.map((c) => (
-                          <option key={c.code} value={c.code}>{c.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="figma-phone-input-wrap">
-                      <label htmlFor="phone" className="figma-label-blue">Mobile Number</label>
-                      <div className={`figma-float-label ${form.phone ? "filled" : ""}`}>
-                        <input className="figma-input figma-phone-input" type="tel" name="phone" id="phone" value={form.phone} onChange={handleChange} onFocus={() => handleFocus("phone")} disabled={!isFieldEnabled("phone")} autoComplete="off" maxLength={10} placeholder=" " />
-                      </div>
-                    </div>
+                <div className="figma-form-group figma-phone-row">
+                  <div className="figma-country-code">
+                    <select
+                      className="figma-country-select"
+                      name="countryCode"
+                      id="countryCode"
+                      value={form.countryCode}
+                      onChange={handleChange}
+                    >
+                      {COUNTRY_CODES.map((c) => (
+                        <option key={c.code} value={c.code}>{c.label}</option>
+                      ))}
+                    </select>
                   </div>
-                  <div className="figma-warning">{warning.phone && !isFieldEnabled("phone") && "⚠ Please fill out the previous field first."}</div>
-                  {touched.phone && fieldErrors.phone && typeof fieldErrors.phone === 'string' && <div className="figma-error">{fieldErrors.phone}</div>}
+                  <div className={`figma-float-label ${form.phone ? "filled" : ""} figma-phone-input-wrap`}>
+                    <input className="figma-input figma-phone-input" type="tel" name="phone" id="phone" value={form.phone} onChange={handleChange} onFocus={() => handleFocus("phone")} disabled={!isFieldEnabled("phone")} autoComplete="off" maxLength={10} placeholder=" " />
+                    <label htmlFor="phone">Mobile Number</label>
+                  </div>
                 </div>
+                <div className="figma-warning">{warning.phone && !isFieldEnabled("phone") && "⚠ Please fill out the previous field first."}</div>
+                {touched.phone && fieldErrors.phone && typeof fieldErrors.phone === 'string' && <div className="figma-error">{fieldErrors.phone}</div>}
                 {/* Password */}
                 <div className="figma-form-group">
-                  <div className="figma-input-with-label">
-                    <label htmlFor="password" className="figma-label-blue">Create Password</label>
-                    <div className={`figma-float-label ${form.password ? "filled" : ""}`}>
-                      <input className="figma-input" type="password" name="password" id="password" value={form.password} onChange={handleChange} onFocus={() => handleFocus("password")} disabled={!isFieldEnabled("password")} autoComplete="off" placeholder=" " />
-                    </div>
+                  <div className={`figma-float-label ${form.password ? "filled" : ""}`}>
+                    <input className="figma-input" type="password" name="password" id="password" value={form.password} onChange={handleChange} onFocus={() => handleFocus("password")} disabled={!isFieldEnabled("password")} autoComplete="off" placeholder=" " />
+                    <label htmlFor="password">Create Password</label>
                   </div>
                   <div className="figma-warning">{warning.password && !isFieldEnabled("password") && "⚠ Please fill out the previous field first."}</div>
                   {touched.password && fieldErrors.password && typeof fieldErrors.password === 'string' && <div className="figma-error">{fieldErrors.password}</div>}
                 </div>
                 {/* Confirm Password */}
                 <div className="figma-form-group">
-                  <div className="figma-input-with-label">
-                    <label htmlFor="confirmPassword" className="figma-label-blue">Confirm Password</label>
-                    <div className={`figma-float-label ${form.confirmPassword ? "filled" : ""}`}>
-                      <input className="figma-input" type="password" name="confirmPassword" id="confirmPassword" value={form.confirmPassword} onChange={handleChange} onFocus={() => handleFocus("confirmPassword")} disabled={!isFieldEnabled("confirmPassword")} autoComplete="off" placeholder=" " />
-                    </div>
+                  <div className={`figma-float-label ${form.confirmPassword ? "filled" : ""}`}>
+                    <input className="figma-input" type="password" name="confirmPassword" id="confirmPassword" value={form.confirmPassword} onChange={handleChange} onFocus={() => handleFocus("confirmPassword")} disabled={!isFieldEnabled("confirmPassword")} autoComplete="off" placeholder=" " />
+                    <label htmlFor="confirmPassword">Confirm Password</label>
                   </div>
                   <div className="figma-warning">{warning.confirmPassword && !isFieldEnabled("confirmPassword") && "⚠ Please fill out the previous field first."}</div>
                   {touched.confirmPassword && fieldErrors.confirmPassword && typeof fieldErrors.confirmPassword === 'string' && <div className="figma-error">{fieldErrors.confirmPassword}</div>}

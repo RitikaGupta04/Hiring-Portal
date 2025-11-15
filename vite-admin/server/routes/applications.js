@@ -106,30 +106,49 @@ router.get('/rankings/top', async (req, res) => {
       return { ...app, nirf10, qs10, teachingPost };
     }));
 
-    // Attach research score (0..10) using application_scores for 'Research Experience'
+    // Attach research metrics: papers, h-index, and score
     try {
       const appIds = enriched.map(a => a.id).filter(Boolean);
       if (appIds.length) {
-        // Find criterion id for Research Experience
-        const { data: crit, error: critErr } = await supabase
-          .from('scoring_criteria')
-          .select('id')
-          .eq('criteria_name', 'Research Experience')
-          .maybeSingle();
-        if (!critErr && crit?.id) {
-          const { data: rows, error: scoreErr } = await supabase
-            .from('application_scores')
-            .select('application_id, score')
-            .eq('criteria_id', crit.id)
-            .in('application_id', appIds);
-          if (!scoreErr && Array.isArray(rows)) {
-            const map = new Map(rows.map(r => [r.application_id, r.score]));
-            enriched = enriched.map(a => {
-              const rs = map.get(a.id);
-              const researchScore10 = (typeof rs === 'number') ? Math.round((rs / 10) * 10) / 10 : null; // 0..10
-              return { ...a, researchScore10 };
-            });
-          }
+        const { data: researchData, error: resErr } = await supabase
+          .from('research_info')
+          .select('application_id, scopus_general_papers, conference_papers, scopus_id, orchid_id')
+          .in('application_id', appIds);
+        
+        if (!resErr && Array.isArray(researchData)) {
+          const map = new Map(researchData.map(r => [
+            r.application_id, 
+            {
+              total_papers: (r.scopus_general_papers || 0) + (r.conference_papers || 0),
+              scopus_papers: r.scopus_general_papers || 0,
+              conference_papers: r.conference_papers || 0,
+              scopus_id: r.scopus_id,
+              orchid_id: r.orchid_id
+            }
+          ]));
+          
+          // Calculate research score and metrics
+          enriched = enriched.map(a => {
+            const research = map.get(a.id);
+            let researchScore10 = null;
+            let totalPapers = 0;
+            
+            if (research) {
+              totalPapers = research.total_papers;
+              
+              // Score based on total Scopus papers: normalize to 0-10 scale
+              // 50+ papers = 10, linear scaling below that
+              const paperScore = Math.min((totalPapers / 50) * 10, 10);
+              
+              researchScore10 = Math.min(Math.round(paperScore * 10) / 10, 10);
+            }
+            
+            return { 
+              ...a, 
+              researchScore10,
+              totalPapers
+            };
+          });
         }
       }
     } catch (e) {

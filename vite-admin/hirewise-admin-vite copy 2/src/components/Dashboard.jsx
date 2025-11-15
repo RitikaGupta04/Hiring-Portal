@@ -20,7 +20,7 @@ const Dashboard = () => {
   const [isPositionFilterOpen, setIsPositionFilterOpen] = useState(false);
   const [positionFilter, setPositionFilter] = useState('All');
   const [candidates, setCandidates] = useState([]);
-  const [rankingMetric, setRankingMetric] = useState('QS'); // University ranking: QS or NIRF
+  const [rankingMetric, setRankingMetric] = useState('QS'); // default to QS per request
   const [isRankingMetricOpen, setIsRankingMetricOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   
@@ -174,17 +174,17 @@ const getFilteredCandidates = () => {
   // Compute research rank helper (within current filtered list)
   const computeResearchRank = (list, cand) => {
     if (!list || !list.length) return '—';
-    
     const arr = [...list].map((c, i) => ({
       key: c.id ?? i,
-      v: typeof c.totalPapers === 'number' ? c.totalPapers : -1,
+      v: typeof c.researchScore10 === 'number' ? c.researchScore10 : -1,
     }));
     arr.sort((a, b) => b.v - a.v);
     const key = cand.id ?? list.indexOf(cand);
     const idx = arr.findIndex(e => e.key === key);
     if (idx === -1) return '—';
+    // If value invalid (<0), return N/A dash
     if (arr[idx].v < 0) return '—';
-    return `${idx + 1} (${arr[idx].v})`;
+    return idx + 1;
   };
 
   const handleCardClick = (type) => {
@@ -460,13 +460,11 @@ const getPositionFilterOptions = () => {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="text-left py-2 px-2 text-xl font-medium text-gray-700">Rank</th>
-                  <th className="text-left py-2 px-2 text-xl font-medium text-gray-700">Name</th>
-                  <th className="text-left py-2 px-2 text-xl font-medium text-gray-700">Position Applied</th>
-                  <th className="text-left py-2 px-2 text-xl font-medium text-gray-700">Department</th>
-                  <th className="text-left py-2 px-2 text-xl font-medium text-gray-700">
-                    Research Rank (Papers)
-                  </th>
+                  <th className="text-left py-2 px-2 text-sm font-medium text-gray-700">Rank</th>
+                  <th className="text-left py-2 px-2 text-sm font-medium text-gray-700">Name</th>
+                  <th className="text-left py-2 px-2 text-sm font-medium text-gray-700">Position Applied</th>
+                  <th className="text-left py-2 px-2 text-sm font-medium text-gray-700">Department</th>
+                  <th className="text-left py-2 px-2 text-sm font-medium text-gray-700">Research Rank</th>
                   <th className="text-left py-2 px-2 text-sm font-medium text-gray-700">
                     <div className="flex items-center gap-2">
                       <span>{rankingMetric} (out of 10)</span>
@@ -497,7 +495,7 @@ const getPositionFilterOptions = () => {
                       </div>
                     </div>
                   </th>
-                  <th className="text-left py-2 px-2 text-xl font-medium text-gray-700">Actions</th>
+                  <th className="text-left py-2 px-2 text-sm font-medium text-gray-700">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -523,35 +521,35 @@ const getPositionFilterOptions = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="py-2 px-2 text-xl font-medium text-gray-900">
+                      <td className="py-2 px-2 text-sm font-medium text-gray-900">
                         {candidate.first_name && candidate.last_name 
                           ? `${candidate.first_name} ${candidate.last_name}`
                           : candidate.name || 'N/A'
                         }
                       </td>
-                      <td className="py-2 px-2 text-xl text-gray-700">
+                      <td className="py-2 px-2 text-sm text-gray-700">
                         {candidate.teachingPost || candidate.positionApplied || candidate.position || 'N/A'}
                       </td>
                       <td className="py-2 px-2">
-                        <span className={`inline-flex px-2 py-1 text-lg font-medium rounded-full ${getDepartmentColor(candidate.department)}`}>
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getDepartmentColor(candidate.department)}`}>
                           {candidate.department || 'N/A'}
                         </span>
                       </td>
-                      <td className="py-2 px-2 text-xl font-bold text-gray-900">
+                      <td className="py-2 px-2 text-sm font-bold text-gray-900">
                         {(() => {
                           // compute research rank among current view list
                           const key = candidate.id ?? index;
                           return computeResearchRank(sortedCandidates, candidate);
                         })()}
                       </td>
-                      <td className="py-2 px-2 text-xl font-bold text-gray-900">
+                      <td className="py-2 px-2 text-sm font-bold text-gray-900">
                         {(() => {
                           const metricValue = rankingMetric === 'NIRF' 
                             ? (candidate.nirf10 ?? null)
                             : (candidate.qs10 ?? null);
                           const val = typeof metricValue === 'number' ? metricValue : null;
                           return (
-                            <span className={`px-2 py-1 rounded-full text-lg font-medium ${
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                               val === null ? 'bg-gray-100 text-gray-600' :
                               val >= 7 ? 'bg-green-100 text-green-800' :
                               val >= 4 ? 'bg-yellow-100 text-yellow-800' :

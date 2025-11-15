@@ -17,7 +17,8 @@ const allowedOrigins = [
   "http://127.0.0.1:5173",
   "http://127.0.0.1:5174",
   "https://hirewise-maxxf2.onrender.com",
-  "https://hirewise-maxx-git-main-madhabs-projects-e78e2689.vercel.app"
+  "https://hirewise-maxx-git-main-madhabs-projects-e78e2689.vercel.app",
+  "https://hiring-portal-mocha.vercel.app"
 ];
 
 app.use(cors({
@@ -31,9 +32,9 @@ app.use(cors({
       callback(new Error('Not allowed by CORS'));
     }
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 }));
 
 // ✅ 3. Apply middleware
