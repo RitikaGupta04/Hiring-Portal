@@ -22,6 +22,8 @@ const Dashboard = () => {
   const [candidates, setCandidates] = useState([]);
   const [rankingMetric, setRankingMetric] = useState('QS'); // University ranking: QS or NIRF
   const [isRankingMetricOpen, setIsRankingMetricOpen] = useState(false);
+  const [researchMetric, setResearchMetric] = useState('Papers'); // Research metric: Papers or H-Index
+  const [isResearchMetricOpen, setIsResearchMetricOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   
 
@@ -175,6 +177,12 @@ const getFilteredCandidates = () => {
   const computeResearchRank = (list, cand) => {
     if (!list || !list.length) return '—';
     
+    // If H-Index is selected, show N/A since we don't have Scopus H-Index data yet
+    if (researchMetric === 'H-Index') {
+      return 'N/A';
+    }
+    
+    // For Papers metric, calculate rank based on totalPapers
     const arr = [...list].map((c, i) => ({
       key: c.id ?? i,
       v: typeof c.totalPapers === 'number' ? c.totalPapers : -1,
@@ -353,44 +361,45 @@ const getPositionFilterOptions = () => {
             <h2 className="text-lg font-semibold text-gray-900">
               Top Selected Candidates ({loading ? 0 : Math.min(filteredCandidates.length, 10)}/10)
             </h2>
-{/* Position Filter */}
-<div className="relative">
-  <button
-    onClick={() => setIsPositionFilterOpen(!isPositionFilterOpen)}
-    className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-  >
-    <Filter className="h-4 w-4" />
-    <span className="text-sm font-medium">
-      {positionFilter === 'All' ? 'All Positions' : positionFilter}
-    </span>
-    <ChevronDown className={`h-4 w-4 transition-transform ${isPositionFilterOpen ? 'rotate-180' : ''}`} />
-  </button>
-  
-  {isPositionFilterOpen && (
-    <div className="absolute top-full right-0 mt-1 w-56 bg-white rounded-lg shadow-lg border z-50 max-h-60 overflow-y-auto">
-      <div className="py-1">
-        {getPositionFilterOptions().map((option) => (
-          <button
-            key={option}
-            onClick={() => {
-              setPositionFilter(option);
-              setIsPositionFilterOpen(false);
-            }}
-            className={`w-full text-left px-4 py-2 hover:bg-gray-50 ${
-              positionFilter === option ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
-            }`}
-          >
-            {option}
-          </button>
-        ))}
-      </div>
-    </div>
-  )}
-</div>
+            
+            {/* Filters Row - All aligned together */}
+            <div className="flex gap-3">
+              {/* Position Filter */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsPositionFilterOpen(!isPositionFilterOpen)}
+                  className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  <Filter className="h-4 w-4" />
+                  <span className="text-sm font-medium">
+                    {positionFilter === 'All' ? 'All Positions' : positionFilter}
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${isPositionFilterOpen ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {isPositionFilterOpen && (
+                  <div className="absolute top-full right-0 mt-1 w-56 bg-white rounded-lg shadow-lg border z-50 max-h-60 overflow-y-auto">
+                    <div className="py-1">
+                      {getPositionFilterOptions().map((option) => (
+                        <button
+                          key={option}
+                          onClick={() => {
+                            setPositionFilter(option);
+                            setIsPositionFilterOpen(false);
+                          }}
+                          className={`w-full text-left px-4 py-2 hover:bg-gray-50 ${
+                            positionFilter === option ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                          }`}
+                        >
+                          {option}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
 
-            {/* School filter */}
-            <div className="flex gap-4">
-              {/* New school filter */}
+              {/* School Filter */}
               <div className="relative">
                 <button
                   onClick={() => setIsSchoolFilterOpen(!isSchoolFilterOpen)}
@@ -421,38 +430,38 @@ const getPositionFilterOptions = () => {
                   </div>
                 )}
               </div>
-            </div>
 
-            {/* Department Filter */}
-            <div className="relative">
-              <button
-                onClick={() => setIsDepartmentFilterOpen(!isDepartmentFilterOpen)}
-                className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                <Filter className="h-4 w-4" />
-                <span className="text-sm font-medium">
-                  {departmentFilter === 'All' ? 'All Departments' : departmentFilter}
-                </span>
-                <ChevronDown className={`h-4 w-4 transition-transform ${isDepartmentFilterOpen ? 'rotate-180' : ''}`} />
-              </button>
-              
-              {isDepartmentFilterOpen && (
-                <div className="absolute top-full right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border z-50">
-                  <div className="py-1">
-                    {getFilterOptions().map((option) => (
-                      <button
-                        key={option}
-                        onClick={() => handleDepartmentFilterChange(option)}
-                        className={`w-full text-left px-4 py-2 hover:bg-gray-50 ${
-                          departmentFilter === option ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
-                        }`}
-                      >
-                        {option === 'All' ? 'All Departments' : option}
-                      </button>
-                    ))}
+              {/* Department Filter */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsDepartmentFilterOpen(!isDepartmentFilterOpen)}
+                  className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  <Filter className="h-4 w-4" />
+                  <span className="text-sm font-medium">
+                    {departmentFilter === 'All' ? 'All Departments' : departmentFilter}
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${isDepartmentFilterOpen ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {isDepartmentFilterOpen && (
+                  <div className="absolute top-full right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border z-50">
+                    <div className="py-1">
+                      {getFilterOptions().map((option) => (
+                        <button
+                          key={option}
+                          onClick={() => handleDepartmentFilterChange(option)}
+                          className={`w-full text-left px-4 py-2 hover:bg-gray-50 ${
+                            departmentFilter === option ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                          }`}
+                        >
+                          {option === 'All' ? 'All Departments' : option}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
           
@@ -465,7 +474,34 @@ const getPositionFilterOptions = () => {
                   <th className="text-left py-2 px-2 text-xl font-medium text-gray-700">Position Applied</th>
                   <th className="text-left py-2 px-2 text-xl font-medium text-gray-700">Department</th>
                   <th className="text-left py-2 px-2 text-xl font-medium text-gray-700">
-                    Research Rank (Papers)
+                    <div className="flex items-center gap-2">
+                      <span>Research Rank ({researchMetric})</span>
+                      {/* Research Metric Dropdown (Papers/H-Index) */}
+                      <div className="relative">
+                        <button
+                          onClick={() => setIsResearchMetricOpen(!isResearchMetricOpen)}
+                          className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors text-xs"
+                        >
+                          <span className="font-medium">{researchMetric}</span>
+                          <ChevronDown className={`h-3 w-3 transition-transform ${isResearchMetricOpen ? 'rotate-180' : ''}`} />
+                        </button>
+                        {isResearchMetricOpen && (
+                          <div className="absolute top-full right-0 mt-1 w-32 bg-white rounded-lg shadow-lg border z-50">
+                            <div className="py-1">
+                              {['Papers','H-Index'].map(opt => (
+                                <button
+                                  key={opt}
+                                  onClick={() => { setResearchMetric(opt); setIsResearchMetricOpen(false); }}
+                                  className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 ${researchMetric === opt ? 'bg-green-50 text-green-700' : 'text-gray-700'}`}
+                                >
+                                  {opt}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </th>
                   <th className="text-left py-2 px-2 text-sm font-medium text-gray-700">
                     <div className="flex items-center gap-2">
