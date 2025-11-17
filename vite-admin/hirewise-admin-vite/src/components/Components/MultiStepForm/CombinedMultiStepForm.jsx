@@ -1664,6 +1664,24 @@ const CombinedMultiStepForm = () => {
   console.log('📝 Starting form data normalization...');
   // Normalize any 'Other' institute choices defensively before deriving values
   const normalized = { ...formData };
+  
+  // Validate required fields before submission
+  if (!normalized.firstName || !normalized.email || !normalized.position || !normalized.department) {
+    console.error('❌ Missing required fields:', {
+      firstName: normalized.firstName || 'MISSING',
+      email: normalized.email || 'MISSING',
+      position: normalized.position || 'MISSING',
+      department: normalized.department || 'MISSING'
+    });
+    alert('❌ Please fill in all required fields:\n\n' + 
+      (!normalized.firstName ? '• First Name\n' : '') +
+      (!normalized.email ? '• Email\n' : '') +
+      (!normalized.position ? '• Position\n' : '') +
+      (!normalized.department ? '• Department' : ''));
+    setSubmitting(false);
+    return;
+  }
+  
   if (normalized.bachelorInstitute === 'Other' && normalized.bachelorInstituteOther) {
     normalized.bachelorInstitute = normalized.bachelorInstituteOther;
   }

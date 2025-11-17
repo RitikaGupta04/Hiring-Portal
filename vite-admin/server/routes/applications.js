@@ -234,7 +234,7 @@ router.post(
         return res.status(401).json({ error: 'Authentication required' });
       }
 
-      if (!first_name || !last_name || !email || !position || !department) {
+      if (!first_name || !email || !position || !department) {
         return res.status(400).json({ error: 'Missing required fields' });
       }
 
