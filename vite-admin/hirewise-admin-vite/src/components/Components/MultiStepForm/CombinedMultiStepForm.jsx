@@ -1626,10 +1626,22 @@ const CombinedMultiStepForm = () => {
   };
 
  const onSubmitFinalApplication = async () => {
+  console.log('🚀 onSubmitFinalApplication called!');
+  
   // Client-side double-submit guard: prevents multiple rapid clicks
-  if (submitting) return;
+  if (submitting) {
+    console.log('⚠️ Already submitting, ignoring duplicate click');
+    return;
+  }
+  
+  console.log('✅ Setting submitting state to true');
   setSubmitting(true);
+  
+  console.log('🔐 Getting authenticated user...');
   const { data: { user }, error: authError } = await supabase.auth.getUser();
+  
+  console.log('👤 User:', user?.id ? `Found (${user.id})` : 'Not found');
+  console.log('🔑 Auth error:', authError || 'None');
   
   if (authError || !user) {
     console.error('❌ User not authenticated:', authError);
@@ -1637,6 +1649,8 @@ const CombinedMultiStepForm = () => {
     setSubmitting(false);
     return;
   }
+  
+  console.log('📝 Starting form data normalization...');
   // Normalize any 'Other' institute choices defensively before deriving values
   const normalized = { ...formData };
   if (normalized.bachelorInstitute === 'Other' && normalized.bachelorInstituteOther) {
@@ -1666,6 +1680,18 @@ const CombinedMultiStepForm = () => {
     derivedUniversity = normalized.bachelorInstitute || '';
     derivedGradYear = normalized.bachelorYear || '';
   }
+
+  console.log('📋 Building FormData...');
+  console.log('Form data summary:', {
+    position: normalized.position,
+    department: normalized.department,
+    firstName: normalized.firstName,
+    lastName: normalized.lastName,
+    email: normalized.email,
+    user_id: user?.id,
+    derivedHighestDegree,
+    derivedUniversity
+  });
 
   // Build multipart/form-data so files are actually uploaded via multer on the server
   const fd = new FormData();
@@ -1740,6 +1766,7 @@ const CombinedMultiStepForm = () => {
     console.log('- lastName:', normalized.lastName);
     console.log('- email:', normalized.email);
     console.log('- user_id:', user?.id);
+    console.log('- API endpoint:', API_BASE + '/api/applications');
     
     // Show warning about Render cold start
     console.log('⏳ Submitting to backend... (This may take up to 60 seconds on first request)');
@@ -1748,6 +1775,7 @@ const CombinedMultiStepForm = () => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 90000);
     
+    console.log('🌐 Making fetch request...');
     const response = await fetch(API_BASE + '/api/applications', {
       method: 'POST',
       body: fd,
@@ -1755,6 +1783,7 @@ const CombinedMultiStepForm = () => {
     });
     
     clearTimeout(timeoutId);
+    console.log('📥 Response received:', response.status, response.statusText);
 
     if (!response.ok) {
       const errorRes = await response.json();
