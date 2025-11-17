@@ -158,6 +158,12 @@ const getFilteredCandidates = () => {
     });
   }
   
+  // Status filter - exclude rejected applications from Top 10 list
+  filtered = filtered.filter(candidate => {
+    const status = (candidate.status || '').toLowerCase();
+    return status !== 'rejected';
+  });
+  
   return filtered;
 };
   const filteredCandidates = getFilteredCandidates();
@@ -587,7 +593,7 @@ const getPositionFilterOptions = () => {
                             : (candidate.qs10 ?? null);
                           const val = typeof metricValue === 'number' ? metricValue : null;
                           return (
-                            <span className={`px-2 py-1 rounded-full text-lg font-medium ${
+                            <span className={`px-2 py-1 rounded-full text-xl font-medium ${
                               val === null ? 'bg-gray-100 text-gray-600' :
                               val >= 7 ? 'bg-green-100 text-green-800' :
                               val >= 4 ? 'bg-yellow-100 text-yellow-800' :
