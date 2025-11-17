@@ -1732,6 +1732,15 @@ const CombinedMultiStepForm = () => {
   }
 
   try {
+    // Debug: Log what we're sending
+    console.log('📤 Sending application data:');
+    console.log('- position:', normalized.position);
+    console.log('- department:', normalized.department);
+    console.log('- firstName:', normalized.firstName);
+    console.log('- lastName:', normalized.lastName);
+    console.log('- email:', normalized.email);
+    console.log('- user_id:', user?.id);
+    
     // Show warning about Render cold start
     console.log('⏳ Submitting to backend... (This may take up to 60 seconds on first request)');
     
