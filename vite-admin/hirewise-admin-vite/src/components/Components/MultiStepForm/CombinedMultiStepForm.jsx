@@ -489,7 +489,19 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
       }
     }
     if (!formData.bachelorCgpa) {
-      newErrors.bachelorCgpa = '%/CGPA is required';
+      newErrors.bachelorCgpa = 'Score is required';
+    } else {
+      const cgpa = parseFloat(formData.bachelorCgpa);
+      const scale = formData.bachelorCgpaScale || 'percentage';
+      if (cgpa < 0) {
+        newErrors.bachelorCgpa = 'Score cannot be negative';
+      } else if (scale === 'percentage' && cgpa > 100) {
+        newErrors.bachelorCgpa = 'Percentage cannot exceed 100';
+      } else if (scale === 'cgpa10' && cgpa > 10) {
+        newErrors.bachelorCgpa = 'CGPA cannot exceed 10';
+      } else if (scale === 'cgpa5' && cgpa > 5) {
+        newErrors.bachelorCgpa = 'CGPA cannot exceed 5';
+      }
     }
     if (!formData.masterInstitute || (formData.masterInstitute === 'Other' && !formData.masterInstituteOther)) {
       newErrors.masterInstitute = 'Institution/University is required';
@@ -510,7 +522,19 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
       }
     }
     if (!formData.masterCgpa) {
-      newErrors.masterCgpa = '%/CGPA is required';
+      newErrors.masterCgpa = 'Score is required';
+    } else {
+      const cgpa = parseFloat(formData.masterCgpa);
+      const scale = formData.masterCgpaScale || 'percentage';
+      if (cgpa < 0) {
+        newErrors.masterCgpa = 'Score cannot be negative';
+      } else if (scale === 'percentage' && cgpa > 100) {
+        newErrors.masterCgpa = 'Percentage cannot exceed 100';
+      } else if (scale === 'cgpa10' && cgpa > 10) {
+        newErrors.masterCgpa = 'CGPA cannot exceed 10';
+      } else if (scale === 'cgpa5' && cgpa > 5) {
+        newErrors.masterCgpa = 'CGPA cannot exceed 5';
+      }
     }
     if (formData.phdStatus !== 'Not done') {
       if (!formData.phdInstitute || (formData.phdInstitute === 'Other' && !formData.phdInstituteOther)) {
@@ -603,13 +627,35 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
           {errors.bachelorYear && <span className="error">{errors.bachelorYear}</span>}
         </div>
         <div className="form-field">
-          <label htmlFor="bachelorCgpa">Percentage/CGPA*</label>
+          <label htmlFor="bachelorCgpaScale">Grading Scale*</label>
+          <select
+            id="bachelorCgpaScale"
+            name="bachelorCgpaScale"
+            value={formData.bachelorCgpaScale || 'percentage'}
+            onChange={handleInputChange}
+          >
+            <option value="percentage">Percentage (Out of 100)</option>
+            <option value="cgpa10">CGPA (Out of 10)</option>
+            <option value="cgpa5">CGPA (Out of 5)</option>
+          </select>
+        </div>
+        <div className="form-field">
+          <label htmlFor="bachelorCgpa">
+            {formData.bachelorCgpaScale === 'percentage' ? 'Percentage*' : 
+             formData.bachelorCgpaScale === 'cgpa10' ? 'CGPA (Out of 10)*' : 'CGPA (Out of 5)*'}
+          </label>
           <input
             type="number"
             id="bachelorCgpa"
             name="bachelorCgpa"
             value={formData.bachelorCgpa || ''}
             onChange={handleInputChange}
+            min="0"
+            max={formData.bachelorCgpaScale === 'percentage' ? '100' : 
+                 formData.bachelorCgpaScale === 'cgpa10' ? '10' : '5'}
+            step="0.01"
+            placeholder={formData.bachelorCgpaScale === 'percentage' ? 'Enter 0-100' : 
+                        formData.bachelorCgpaScale === 'cgpa10' ? 'Enter 0-10' : 'Enter 0-5'}
           />
           {errors.bachelorCgpa && <span className="error">{errors.bachelorCgpa}</span>}
         </div>
@@ -665,13 +711,35 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
           {errors.masterYear && <span className="error">{errors.masterYear}</span>}
         </div>
         <div className="form-field">
-          <label htmlFor="masterCgpa">Percentage/CGPA*</label>
+          <label htmlFor="masterCgpaScale">Grading Scale*</label>
+          <select
+            id="masterCgpaScale"
+            name="masterCgpaScale"
+            value={formData.masterCgpaScale || 'percentage'}
+            onChange={handleInputChange}
+          >
+            <option value="percentage">Percentage (Out of 100)</option>
+            <option value="cgpa10">CGPA (Out of 10)</option>
+            <option value="cgpa5">CGPA (Out of 5)</option>
+          </select>
+        </div>
+        <div className="form-field">
+          <label htmlFor="masterCgpa">
+            {formData.masterCgpaScale === 'percentage' ? 'Percentage*' : 
+             formData.masterCgpaScale === 'cgpa10' ? 'CGPA (Out of 10)*' : 'CGPA (Out of 5)*'}
+          </label>
           <input
             type="number"
             id="masterCgpa"
             name="masterCgpa"
             value={formData.masterCgpa || ''}
             onChange={handleInputChange}
+            min="0"
+            max={formData.masterCgpaScale === 'percentage' ? '100' : 
+                 formData.masterCgpaScale === 'cgpa10' ? '10' : '5'}
+            step="0.01"
+            placeholder={formData.masterCgpaScale === 'percentage' ? 'Enter 0-100' : 
+                        formData.masterCgpaScale === 'cgpa10' ? 'Enter 0-10' : 'Enter 0-5'}
           />
           {errors.masterCgpa && <span className="error">{errors.masterCgpa}</span>}
         </div>
