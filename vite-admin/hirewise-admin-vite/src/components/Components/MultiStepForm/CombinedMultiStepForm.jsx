@@ -1118,6 +1118,7 @@ const Experience = ({ formData, setFormData, onNext, onPrevious, onSaveExit }) =
               id={`teachingStartDate${idx}`}
               name="teachingStartDate"
               value={exp.teachingStartDate}
+              max={new Date().toISOString().split('T')[0]}
               onChange={(e) => handleTeachingChange(idx, e)}
             />
             {errors.teaching && errors.teaching[idx] && errors.teaching[idx].teachingStartDate && (
@@ -1131,6 +1132,7 @@ const Experience = ({ formData, setFormData, onNext, onPrevious, onSaveExit }) =
               id={`teachingEndDate${idx}`}
               name="teachingEndDate"
               value={exp.teachingEndDate}
+              max={new Date().toISOString().split('T')[0]}
               onChange={(e) => handleTeachingChange(idx, e)}
             />
             {errors.teaching && errors.teaching[idx] && errors.teaching[idx].teachingEndDate && (
@@ -1244,6 +1246,7 @@ const Experience = ({ formData, setFormData, onNext, onPrevious, onSaveExit }) =
               id={`researchStartDate${idx}`}
               name="researchStartDate"
               value={exp.researchStartDate}
+              max={new Date().toISOString().split('T')[0]}
               onChange={(e) => handleResearchChange(idx, e)}
             />
             {errors.research && errors.research[idx] && errors.research[idx].researchStartDate && (
@@ -1257,6 +1260,7 @@ const Experience = ({ formData, setFormData, onNext, onPrevious, onSaveExit }) =
               id={`researchEndDate${idx}`}
               name="researchEndDate"
               value={exp.researchEndDate}
+              max={new Date().toISOString().split('T')[0]}
               onChange={(e) => handleResearchChange(idx, e)}
             />
             {errors.research && errors.research[idx] && errors.research[idx].researchEndDate && (
