@@ -165,6 +165,7 @@
 .form-field input[type="email"],
 .form-field input[type="tel"],
 .form-field input[type="date"], /* Added date type */
+.form-field input[type="url"], /* Added url type */
 .form-field input[type="file"],
 .form-field textarea {
   width: 100%;
