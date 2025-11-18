@@ -34,6 +34,7 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
   const [fieldErrors, setFieldErrors] = useState({}); // For field-specific errors (object)
   const [generalFormError, setGeneralFormError] = useState(""); // For general form errors (string)
   const [showLogin, setShowLogin] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   // Validation
@@ -97,43 +98,71 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
 
   // Handle registration submit
   const handleRegistrationSubmit = async (e) => {
-    e.preventDefault();
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    // Prevent double-submit
+    if (isSubmitting) {
+      console.log('Already submitting, ignoring click');
+      return;
+    }
+    
+    console.log('Registration button clicked - starting validation');
     setGeneralFormError(""); // Clear any previous general form error
 
+    // Mark all fields as touched to show validation errors
+    const allTouched = fields.reduce((acc, f) => ({ ...acc, [f]: true }), {});
+    setTouched(allTouched);
+
     if (form.password !== form.confirmPassword) {
+      console.log('Password mismatch');
       setGeneralFormError('Passwords do not match');
       return;
     }
 
-    if (isRegistrationFormValid) {
-      try {
-        // Ensure no stale session is present (prevents loading another user's draft)
-        await supabase.auth.signOut();
-
-        // 1) Register user
-        await registerUser({
-          name: form.name,
-          email: form.email,
-          phone: `${form.countryCode} ${form.phone}`,
-          password: form.password
-        });
-
-        // 2) Explicitly sign in as the newly registered user
-        try {
-          await loginUser({ username: form.email, password: form.password });
-        } catch (loginErr) {
-          // If auto-login fails (e.g., email confirmation required), show a helpful message
-          setGeneralFormError(loginErr.message || 'Please verify your email, then login.');
-          return;
-        }
-
-        // 3) Navigate only after we are sure the session belongs to the new user
-        navigate('/application');
-      } catch (err) {
-        setGeneralFormError(err.message || 'Registration failed');
-      }
-    } else {
+    if (!isRegistrationFormValid) {
+      console.log('Form validation failed');
       setGeneralFormError('Please fill in all required fields correctly');
+      return;
+    }
+
+    console.log('Validation passed - starting registration API call');
+    setIsSubmitting(true);
+    
+    try {
+      // 1) Register user (registerUser already handles signUp + auto session creation)
+      const result = await registerUser({
+        name: form.name,
+        email: form.email,
+        phone: `${form.countryCode} ${form.phone}`,
+        password: form.password
+      });
+
+      console.log('Registration API successful:', result);
+      
+      // Wait a moment for Supabase session to be fully established
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      console.log('Navigating to /application');
+      
+      // 2) Navigate immediately - Supabase auto-creates session on signUp
+      navigate('/application');
+    } catch (err) {
+      console.error('Registration error:', err);
+      const errorMessage = err.message || 'Registration failed';
+      
+      // Show user-friendly messages for common errors
+      if (errorMessage.includes('422')) {
+        setGeneralFormError('Server validation error. Please check all fields are filled correctly.');
+      } else if (errorMessage.includes('already registered') || errorMessage.includes('already exists')) {
+        setGeneralFormError('This email is already registered. Please login instead.');
+      } else {
+        setGeneralFormError(errorMessage);
+      }
+      
+      setIsSubmitting(false);
     }
   };
 
@@ -141,10 +170,17 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
+    
+    // Prevent double-submit
+    if (isLoggingIn) return;
+    
     setLoginError(''); // Clear any previous login error
+    setIsLoggingIn(true);
+    
     try {
       await loginUser({
         username: loginUsername,
@@ -154,6 +190,7 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
       else navigate('/application');
     } catch (err) {
       setLoginError(err.message || 'Invalid email/phone or password');
+      setIsLoggingIn(false);
     }
   };
 
@@ -205,9 +242,35 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
                   </div>
                 </div>
                 {loginError && <div className="figma-error">{loginError}</div>}
-                <button className="figma-apply-btn" type="submit">
-                  <span className="figma-send-icon"><svg width="18" height="18" fill="none" viewBox="0 0 18 18"><path d="M3 15l12-6-12-6v5l8 1-8 1v5z" fill="#fff"/></svg></span>
-                  LOGIN
+                <button 
+                  className="figma-apply-btn" 
+                  type="submit"
+                  disabled={isLoggingIn}
+                  style={{
+                    cursor: isLoggingIn ? 'wait' : 'pointer',
+                    opacity: isLoggingIn ? 0.7 : 1,
+                  }}
+                >
+                  {isLoggingIn ? (
+                    <>
+                      <span style={{
+                        display: 'inline-block',
+                        width: '14px',
+                        height: '14px',
+                        border: '2px solid #ffffff',
+                        borderTop: '2px solid transparent',
+                        borderRadius: '50%',
+                        animation: 'spin 0.6s linear infinite',
+                        marginRight: '8px',
+                      }}></span>
+                      LOGGING IN...
+                    </>
+                  ) : (
+                    <>
+                      <span className="figma-send-icon"><svg width="18" height="18" fill="none" viewBox="0 0 18 18"><path d="M3 15l12-6-12-6v5l8 1-8 1v5z" fill="#fff"/></svg></span>
+                      LOGIN
+                    </>
+                  )}
                 </button>
               </form>
             </div>
@@ -288,9 +351,36 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
                   {touched.confirmPassword && fieldErrors.confirmPassword && typeof fieldErrors.confirmPassword === 'string' && <div className="figma-error">{fieldErrors.confirmPassword}</div>}
                 </div>
                 {generalFormError && <div className="figma-error">{generalFormError}</div>}
-                <button className="figma-apply-btn" type="submit" disabled={!isRegistrationFormValid}>
-                  <span className="figma-send-icon"><svg width="18" height="18" fill="none" viewBox="0 0 18 18"><path d="M3 15l12-6-12-6v5l8 1-8 1v5z" fill="#fff"/></svg></span>
-                  APPLY NOW
+                <button 
+                  className="figma-apply-btn" 
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={handleRegistrationSubmit}
+                  style={{
+                    cursor: isSubmitting ? 'wait' : 'pointer',
+                    opacity: isSubmitting ? 0.7 : 1,
+                  }}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <span style={{
+                        display: 'inline-block',
+                        width: '14px',
+                        height: '14px',
+                        border: '2px solid #ffffff',
+                        borderTop: '2px solid transparent',
+                        borderRadius: '50%',
+                        animation: 'spin 0.6s linear infinite',
+                        marginRight: '8px',
+                      }}></span>
+                      REGISTERING...
+                    </>
+                  ) : (
+                    <>
+                      <span className="figma-send-icon"><svg width="18" height="18" fill="none" viewBox="0 0 18 18"><path d="M3 15l12-6-12-6v5l8 1-8 1v5z" fill="#fff"/></svg></span>
+                      APPLY NOW
+                    </>
+                  )}
                 </button>
                 <p className="auth-link">
                   Already have an account?

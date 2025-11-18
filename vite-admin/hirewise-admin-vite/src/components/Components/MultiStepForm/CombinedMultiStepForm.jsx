@@ -260,7 +260,12 @@ const PersonalInformation = ({ formData, setFormData, onNext, onPrevious, onSave
       let age = today.getFullYear() - birthDate.getFullYear();
       const monthDiff = today.getMonth() - birthDate.getMonth();
       if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
+      
       if (age < 21) newErrors.dateOfBirth = 'You must be at least 21 years old';
+      else if (age > 80) newErrors.dateOfBirth = 'Age cannot exceed 80 years';
+      
+      // Check if date is in the future
+      if (birthDate > today) newErrors.dateOfBirth = 'Date of Birth cannot be in the future';
     }
     if (!formData.nationality) newErrors.nationality = 'Nationality is required';
     setErrors(newErrors);
@@ -389,6 +394,16 @@ const PersonalInformation = ({ formData, setFormData, onNext, onPrevious, onSave
             id="dateOfBirth"
             value={formData.dateOfBirth || ''}
             onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+            min={(() => {
+              const date = new Date();
+              date.setFullYear(date.getFullYear() - 80);
+              return date.toISOString().split('T')[0];
+            })()}
+            max={(() => {
+              const date = new Date();
+              date.setFullYear(date.getFullYear() - 21);
+              return date.toISOString().split('T')[0];
+            })()}
           />
           {errors.dateOfBirth && <span className="error">{errors.dateOfBirth}</span>}
         </div>

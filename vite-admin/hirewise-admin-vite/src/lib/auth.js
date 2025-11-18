@@ -3,17 +3,26 @@ import { API_BASE } from './config';
 
 // Register a new user
 export async function registerUser({ name, email, phone, password }) {
+  console.log('Calling registration API:', `${API_BASE}/api/auth/register`);
+  console.log('Registration data:', { name, email, phone: phone.substring(0, 5) + '...', password: '***' });
+  
   // Use backend to create user with email already confirmed
   const res = await fetch(`${API_BASE}/api/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, email, phone, password })
   });
+  
+  console.log('Registration API response status:', res.status);
+  
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || 'Registration failed');
+    console.error('Registration API error:', err);
+    throw new Error(err.error || `Registration failed (HTTP ${res.status})`);
   }
+  
   const data = await res.json();
+  console.log('Registration successful:', data);
   return data.user;
 }
 
