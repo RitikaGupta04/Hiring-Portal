@@ -13,7 +13,7 @@ const PositionSelection = ({ formData, setFormData, onNext, onSaveExit }) => {
   const [departments, setDepartments] = useState([]);
   const [branches, setBranches] = useState([]);
   const teachingDepartments = [
-    { id: 'engineering', name: 'School of Engineering' },
+    { id: 'engineering', name: 'School of Engineering & Technology' },
     { id: 'law', name: 'School of Law' },
     { id: 'management', name: 'School of Management' },
     { id: 'liberal', name: 'School of Liberal Studies' },
