@@ -1592,15 +1592,32 @@ const CombinedMultiStepForm = () => {
       if (!user) return;
 
       try {
+        // First check if user has already submitted an application
+        const { data: existingApp } = await supabase
+          .from('applications')
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        // If application exists, don't load draft
+        if (existingApp) {
+          console.log('Application already submitted, not loading draft');
+          return;
+        }
+
+        // Load draft only if no application exists
         const { data, error } = await supabase
           .from('draft_applications')
           .select('form_data, current_step')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
-        if (data) {
+        if (data && data.form_data) {
+          console.log('Loading draft for user:', user.id);
           setFormData(data.form_data);
           setCurrentStep(data.current_step);
+        } else {
+          console.log('No draft found for new user:', user.id);
         }
       } catch (err) {
         console.log('No draft found or error:', err.message);
