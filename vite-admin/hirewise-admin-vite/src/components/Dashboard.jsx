@@ -179,7 +179,7 @@ const getFilteredCandidates = () => {
     return copy;
   }, [filteredCandidates, rankingMetric]);
 
-  // Compute research rank helper (within current filtered list)
+  // Get paper count for display (sorted descending, highest on top)
   const computeResearchRank = (list, cand) => {
     if (!list || !list.length) return '—';
     
@@ -188,17 +188,10 @@ const getFilteredCandidates = () => {
       return 'N/A';
     }
     
-    // For Papers metric, calculate rank based on totalPapers
-    const arr = [...list].map((c, i) => ({
-      key: c.id ?? i,
-      v: typeof c.totalPapers === 'number' ? c.totalPapers : -1,
-    }));
-    arr.sort((a, b) => b.v - a.v);
-    const key = cand.id ?? list.indexOf(cand);
-    const idx = arr.findIndex(e => e.key === key);
-    if (idx === -1) return '—';
-    if (arr[idx].v < 0) return '—';
-    return `${idx + 1} (${arr[idx].v})`;
+    // For Papers metric, just return the paper count (no rank)
+    const paperCount = typeof cand.totalPapers === 'number' ? cand.totalPapers : -1;
+    if (paperCount < 0) return '—';
+    return paperCount;
   };
 
   const handleCardClick = (type) => {
