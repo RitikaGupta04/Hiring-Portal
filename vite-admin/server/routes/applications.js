@@ -162,6 +162,77 @@ router.get('/rankings/top', async (req, res) => {
   }
 });
 
+// Get single application by ID with all details
+router.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Fetch application details
+    const { data: app, error: appError } = await supabase
+      .from('faculty_applications')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (appError || !app) {
+      return res.status(404).json({ error: 'Application not found' });
+    }
+
+    // Fetch research info
+    const { data: researchInfo } = await supabase
+      .from('research_info')
+      .select('*')
+      .eq('application_id', id)
+      .single();
+
+    // Fetch teaching experiences
+    const { data: teachingExp } = await supabase
+      .from('teaching_experiences')
+      .select('*')
+      .eq('application_id', id)
+      .order('start_date', { ascending: false });
+
+    // Fetch research experiences
+    const { data: researchExp } = await supabase
+      .from('research_experiences')
+      .select('*')
+      .eq('application_id', id)
+      .order('start_date', { ascending: false });
+
+    // Calculate research metrics
+    let totalPapers = 0;
+    let researchScore10 = null;
+    if (researchInfo) {
+      totalPapers = (researchInfo.scopus_general_papers || 0) + (researchInfo.conference_papers || 0);
+      const paperScore = Math.min((totalPapers / 50) * 10, 10);
+      researchScore10 = Math.min(Math.round(paperScore * 10) / 10, 10);
+    }
+
+    // Get university ranking scores
+    const uniLower = (app.university || '').toLowerCase();
+    const { nirf10, qs10 } = scoringService.getUniversityRankingScores(uniLower);
+
+    // Combine all data
+    const fullData = {
+      ...app,
+      researchInfo,
+      teachingExperiences: teachingExp || [],
+      researchExperiences: researchExp || [],
+      totalPapers,
+      researchScore10,
+      nirf10,
+      qs10,
+      scopus_id: researchInfo?.scopus_id,
+      orchid_id: researchInfo?.orchid_id
+    };
+
+    res.json(fullData);
+  } catch (error) {
+    console.error('Error fetching application details:', error);
+    res.status(500).json({ error: error.message || 'Failed to fetch application details' });
+  }
+});
+
 router.post(
   '/',
   upload.fields([

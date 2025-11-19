@@ -242,9 +242,28 @@ const getPositionFilterOptions = () => {
   ];
 };
 
-  const openCandidatePopup = (candidate) => {
-    setSelectedCandidate(candidate);
+  const openCandidatePopup = async (candidate) => {
     setIsPopupOpen(true);
+    setSelectedCandidate({ ...candidate, loading: true });
+    
+    // Fetch complete application details including education, experience, etc.
+    try {
+      const response = await fetch(`${API_BASE}/api/applications/${candidate.id}`);
+      if (response.ok) {
+        const fullData = await response.json();
+        setSelectedCandidate({ 
+          ...candidate, 
+          ...fullData,
+          listRank: candidate.listRank,
+          loading: false 
+        });
+      } else {
+        setSelectedCandidate({ ...candidate, loading: false });
+      }
+    } catch (error) {
+      console.error('Error fetching candidate details:', error);
+      setSelectedCandidate({ ...candidate, loading: false });
+    }
   };
 
   const closeCandidatePopup = () => {
@@ -646,127 +665,381 @@ const getPositionFilterOptions = () => {
 
       {/* Candidate Details Popup */}
       {isPopupOpen && selectedCandidate && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2">
-          <div className="bg-white rounded-lg shadow-xl max-w-[95%] w-full max-h-[95vh] overflow-y-auto">
-            {/* Close button only in top-right corner */}
-            <button
-              onClick={closeCandidatePopup}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10"
-            >
-              <X className="h-6 w-6" />
-            </button>
-            
-            <div className="p-6 space-y-6">
-              {/* Line 1: Rank and Name */}
-              <div className="flex items-center gap-4 pt-2">
-                <div className="flex-shrink-0">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white ${
-                    (selectedCandidate.gender || '').toLowerCase() === 'female' ? 'bg-pink-500' : 'bg-blue-500'
-                  }`}>
-                    {selectedCandidate.listRank || 1}
-                  </div>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-7xl max-h-[95vh] overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold text-white ${
+                  (selectedCandidate.gender || '').toLowerCase() === 'female' ? 'bg-pink-500' : 'bg-blue-500'
+                }`}>
+                  {selectedCandidate.listRank || 1}
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900" style={{ fontFamily: 'Arial, sans-serif' }}>
+                  <h2 className="text-2xl font-bold text-gray-900">
                     {selectedCandidate.first_name 
-                      ? `${selectedCandidate.first_name}${selectedCandidate.last_name ? ' ' + selectedCandidate.last_name : ''}`
+                      ? `${selectedCandidate.first_name}${selectedCandidate.middle_name ? ' ' + selectedCandidate.middle_name : ''}${selectedCandidate.last_name ? ' ' + selectedCandidate.last_name : ''}`
                       : 'N/A'
                     }
                   </h2>
+                  <p className="text-sm text-gray-600">{selectedCandidate.email}</p>
                 </div>
               </div>
-
-              {/* Line 2: Institution */}
-              <div>
-                <p className="text-sm font-bold text-gray-800 mb-1">PHD INSTITUTION</p>
-                <p className="text-base font-normal text-gray-500">{selectedCandidate.institution || "Not specified"}</p>
-              </div>
-
-              {/* Divider */}
-              <div className="border-t border-gray-100 my-4"></div>
-
-              {/* Rest of the details in grid layout */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <p className="text-sm font-bold text-gray-800 mb-1">POSITION APPLIED</p>
-                  <p className="text-base font-normal text-gray-500">{selectedCandidate.positionApplied}</p>
-                </div>
-                
-                <div>
-                  <p className="text-sm font-bold text-gray-800 mb-1">SCHOOL</p>
-                  <p className="text-base font-normal text-gray-500">{selectedCandidate.school}</p>
-                </div>
-                
-                <div>
-                  <p className="text-sm font-bold text-gray-800 mb-1">
-                    {selectedView === 'teaching' ? 'DEPARTMENT' : 'CATEGORY'}
-                  </p>
-                  <span className={`inline-flex px-3 py-1 text-sm font-normal rounded-full ${getDepartmentColor(selectedCandidate.department)}`}>
-                    {selectedCandidate.department}
-                  </span>
-                </div>
-                
-                <div>
-                  <p className="text-sm font-bold text-gray-800 mb-1">{rankingMetric} SCORE (out of 10)</p>
-                  <p className="text-base font-normal text-gray-500">
-                    {rankingMetric === 'NIRF' 
-                      ? (selectedCandidate.nirf10 ?? 'N/A') 
-                      : (selectedCandidate.qs10 ?? 'N/A')}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-gray-800 mb-1">RESEARCH (out of 10)</p>
-                  <p className="text-base font-normal text-gray-500">{selectedCandidate.researchScore10 ?? 'N/A'}</p>
-                </div>
-                
-                <div>
-                  <p className="text-sm font-bold text-gray-800 mb-1">EMAIL</p>
-                  <p className="text-base font-normal text-gray-500">{selectedCandidate.email}</p>
-                </div>
-                
-                <div>
-                  <p className="text-sm font-bold text-gray-800 mb-1">PHONE</p>
-                  <p className="text-base font-normal text-gray-500">{selectedCandidate.phone}</p>
-                </div>
-                
-                <div>
-                  <p className="text-sm font-bold text-gray-800 mb-1">EXPERIENCE</p>
-                  <p className="text-base font-normal text-gray-500">{selectedCandidate.experience}</p>
-                </div>
-                
-                <div>
-                  <p className="text-sm font-bold text-gray-800 mb-1">QUALIFICATION</p>
-                  <p className="text-base font-normal text-gray-500">{selectedCandidate.qualification}</p>
-                </div>
-              </div>
-
-              {/* Full width fields */}
-              <div>
-                <p className="text-sm font-bold text-gray-800 mb-1">SPECIALIZATION</p>
-                <p className="text-base font-normal text-gray-500">{selectedCandidate.specialization}</p>
-              </div>
-              
-              <div>
-                <p className="text-sm font-bold text-gray-800 mb-1">
-                  {selectedView === 'teaching' ? 'PUBLICATIONS' : 'CERTIFICATIONS'}
-                </p>
-                <p className="text-base font-normal text-gray-500">
-                  {selectedView === 'teaching' ? selectedCandidate.publications : selectedCandidate.certifications}
-                </p>
-              </div>
-            </div>
-            
-            {/* Action buttons */}
-            <div className="flex justify-end gap-3 p-6 border-t bg-gray-50 sticky bottom-0">
               <button
                 onClick={closeCandidatePopup}
-                className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+                {/* Left Side - Detailed Information */}
+                <div className="space-y-6">
+                  {selectedCandidate.loading ? (
+                    <div className="text-center py-8 text-gray-500">Loading details...</div>
+                  ) : (
+                    <>
+                      {/* Basic Info */}
+                      <div className="bg-white border rounded-lg p-4 shadow-sm">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Basic Information</h3>
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <p className="text-xs font-semibold text-gray-500 uppercase">Position Applied</p>
+                              <p className="text-sm text-gray-900">{selectedCandidate.positionApplied || selectedCandidate.position || 'N/A'}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs font-semibold text-gray-500 uppercase">Department</p>
+                              <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getDepartmentColor(selectedCandidate.department)}`}>
+                                {selectedCandidate.department || 'N/A'}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <p className="text-xs font-semibold text-gray-500 uppercase">School</p>
+                              <p className="text-sm text-gray-900">{selectedCandidate.school || 'N/A'}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs font-semibold text-gray-500 uppercase">Branch</p>
+                              <p className="text-sm text-gray-900">{selectedCandidate.branch || 'N/A'}</p>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <p className="text-xs font-semibold text-gray-500 uppercase">Phone</p>
+                              <p className="text-sm text-gray-900">{selectedCandidate.phone || 'N/A'}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs font-semibold text-gray-500 uppercase">Gender</p>
+                              <p className="text-sm text-gray-900">{selectedCandidate.gender || 'N/A'}</p>
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-xs font-semibold text-gray-500 uppercase">Address</p>
+                            <p className="text-sm text-gray-900">{selectedCandidate.address || 'N/A'}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Education */}
+                      <div className="bg-white border rounded-lg p-4 shadow-sm">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Education</h3>
+                        <div className="space-y-4">
+                          {/* PhD */}
+                          {selectedCandidate.phd_status && selectedCandidate.phd_status !== 'Not done' && (
+                            <div className="border-l-4 border-indigo-500 pl-4">
+                              <p className="text-xs font-semibold text-indigo-600 uppercase">PhD</p>
+                              <p className="text-sm font-medium text-gray-900">{selectedCandidate.phd_institute || selectedCandidate.institution || 'N/A'}</p>
+                              <p className="text-xs text-gray-600">
+                                {selectedCandidate.phd_degree_name || 'N/A'} | Year: {selectedCandidate.phd_year || 'N/A'}
+                              </p>
+                              {selectedCandidate.phd_specialization && (
+                                <p className="text-xs text-gray-600 mt-1">Specialization: {selectedCandidate.phd_specialization}</p>
+                              )}
+                            </div>
+                          )}
+                          
+                          {/* Master's */}
+                          {selectedCandidate.master_institute && (
+                            <div className="border-l-4 border-blue-500 pl-4">
+                              <p className="text-xs font-semibold text-blue-600 uppercase">Master's Degree</p>
+                              <p className="text-sm font-medium text-gray-900">{selectedCandidate.master_institute}</p>
+                              <p className="text-xs text-gray-600">
+                                {selectedCandidate.master_degree_name || 'N/A'} | Year: {selectedCandidate.master_year || 'N/A'}
+                              </p>
+                            </div>
+                          )}
+                          
+                          {/* Bachelor's */}
+                          {selectedCandidate.bachelor_institute && (
+                            <div className="border-l-4 border-green-500 pl-4">
+                              <p className="text-xs font-semibold text-green-600 uppercase">Bachelor's Degree</p>
+                              <p className="text-sm font-medium text-gray-900">{selectedCandidate.bachelor_institute}</p>
+                              <p className="text-xs text-gray-600">
+                                {selectedCandidate.bachelor_degree_name || 'N/A'} | Year: {selectedCandidate.bachelor_year || 'N/A'}
+                              </p>
+                            </div>
+                          )}
+                          
+                          {/* Highest Degree Summary */}
+                          <div className="bg-gray-50 rounded p-3 mt-2">
+                            <p className="text-xs font-semibold text-gray-500 uppercase">Highest Qualification</p>
+                            <p className="text-sm text-gray-900">{selectedCandidate.highest_degree || selectedCandidate.qualification || 'N/A'}</p>
+                            <p className="text-xs text-gray-600">
+                              {selectedCandidate.university || 'N/A'} | Graduated: {selectedCandidate.graduation_year || 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Experience */}
+                      <div className="bg-white border rounded-lg p-4 shadow-sm">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Experience</h3>
+                        <div className="space-y-3">
+                          <div>
+                            <p className="text-xs font-semibold text-gray-500 uppercase">Total Experience</p>
+                            <p className="text-sm text-gray-900">{selectedCandidate.experience || selectedCandidate.total_experience || 'N/A'}</p>
+                          </div>
+                          {selectedCandidate.teachingPost && (
+                            <div>
+                              <p className="text-xs font-semibold text-gray-500 uppercase">Current/Recent Position</p>
+                              <p className="text-sm text-gray-900">{selectedCandidate.teachingPost}</p>
+                            </div>
+                          )}
+                          {selectedCandidate.teaching_experience && (
+                            <div>
+                              <p className="text-xs font-semibold text-gray-500 uppercase">Teaching Experience</p>
+                              <p className="text-sm text-gray-900">{selectedCandidate.teaching_experience}</p>
+                            </div>
+                          )}
+                          {selectedCandidate.research_experience && (
+                            <div>
+                              <p className="text-xs font-semibold text-gray-500 uppercase">Research Experience</p>
+                              <p className="text-sm text-gray-900">{selectedCandidate.research_experience}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Research & Publications */}
+                      <div className="bg-white border rounded-lg p-4 shadow-sm">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Research & Publications</h3>
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <p className="text-xs font-semibold text-gray-500 uppercase">Total Papers</p>
+                              <p className="text-2xl font-bold text-indigo-600">{selectedCandidate.totalPapers || 0}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs font-semibold text-gray-500 uppercase">Research Score</p>
+                              <p className="text-2xl font-bold text-green-600">{selectedCandidate.researchScore10 || 'N/A'}/10</p>
+                            </div>
+                          </div>
+                          {selectedCandidate.scopus_id && (
+                            <div>
+                              <p className="text-xs font-semibold text-gray-500 uppercase">Scopus ID</p>
+                              <p className="text-sm text-gray-900">{selectedCandidate.scopus_id}</p>
+                            </div>
+                          )}
+                          {selectedCandidate.orchid_id && (
+                            <div>
+                              <p className="text-xs font-semibold text-gray-500 uppercase">ORCID</p>
+                              <p className="text-sm text-gray-900">{selectedCandidate.orchid_id}</p>
+                            </div>
+                          )}
+                          {selectedCandidate.specialization && (
+                            <div>
+                              <p className="text-xs font-semibold text-gray-500 uppercase">Specialization</p>
+                              <p className="text-sm text-gray-900">{selectedCandidate.specialization}</p>
+                            </div>
+                          )}
+                          {selectedCandidate.publications && (
+                            <div>
+                              <p className="text-xs font-semibold text-gray-500 uppercase">Publications</p>
+                              <p className="text-sm text-gray-900 whitespace-pre-wrap">{selectedCandidate.publications}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Additional Info */}
+                      {selectedCandidate.certifications && (
+                        <div className="bg-white border rounded-lg p-4 shadow-sm">
+                          <h3 className="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Certifications</h3>
+                          <p className="text-sm text-gray-900 whitespace-pre-wrap">{selectedCandidate.certifications}</p>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {/* Right Side - Visual Representation */}
+                <div className="space-y-6">
+                  {!selectedCandidate.loading && (
+                    <>
+                      {/* Score Overview Card */}
+                      <div className="bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-indigo-200 rounded-lg p-6 shadow-lg">
+                        <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">Overall Ranking</h3>
+                        <div className="flex items-center justify-center mb-6">
+                          <div className={`w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold text-white ${
+                            (selectedCandidate.gender || '').toLowerCase() === 'female' ? 'bg-pink-500' : 'bg-blue-500'
+                          } shadow-xl`}>
+                            #{selectedCandidate.listRank || 1}
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm text-gray-600 mb-1">Total Score</p>
+                          <p className="text-4xl font-bold text-indigo-600">{selectedCandidate.total_score?.toFixed(1) || 'N/A'}</p>
+                        </div>
+                      </div>
+
+                      {/* University Ranking Scores */}
+                      <div className="bg-white border rounded-lg p-6 shadow-sm">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4 border-b pb-2">University Rankings</h3>
+                        <div className="space-y-4">
+                          {/* QS Score Bar */}
+                          <div>
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm font-semibold text-gray-700">QS Ranking</span>
+                              <span className="text-lg font-bold text-blue-600">{selectedCandidate.qs10 || 0}/10</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                              <div 
+                                className="bg-gradient-to-r from-blue-400 to-blue-600 h-full rounded-full transition-all duration-500"
+                                style={{ width: `${((selectedCandidate.qs10 || 0) / 10) * 100}%` }}
+                              ></div>
+                            </div>
+                          </div>
+
+                          {/* NIRF Score Bar */}
+                          <div>
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm font-semibold text-gray-700">NIRF Ranking</span>
+                              <span className="text-lg font-bold text-orange-600">{selectedCandidate.nirf10 || 0}/10</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                              <div 
+                                className="bg-gradient-to-r from-orange-400 to-orange-600 h-full rounded-full transition-all duration-500"
+                                style={{ width: `${((selectedCandidate.nirf10 || 0) / 10) * 100}%` }}
+                              ></div>
+                            </div>
+                          </div>
+
+                          {/* Research Score Bar */}
+                          <div>
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm font-semibold text-gray-700">Research Score</span>
+                              <span className="text-lg font-bold text-green-600">{selectedCandidate.researchScore10 || 0}/10</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                              <div 
+                                className="bg-gradient-to-r from-green-400 to-green-600 h-full rounded-full transition-all duration-500"
+                                style={{ width: `${((selectedCandidate.researchScore10 || 0) / 10) * 100}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Score Breakdown Pie Chart */}
+                      <div className="bg-white border rounded-lg p-6 shadow-sm">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Score Distribution</h3>
+                        <ResponsiveContainer width="100%" height={250}>
+                          <PieChart>
+                            <Pie
+                              data={[
+                                { name: 'University Ranking', value: Math.max(selectedCandidate.qs10 || 0, selectedCandidate.nirf10 || 0), color: '#3b82f6' },
+                                { name: 'Research', value: selectedCandidate.researchScore10 || 0, color: '#10b981' },
+                                { name: 'Other', value: Math.max(0, (selectedCandidate.total_score || 0) - (Math.max(selectedCandidate.qs10 || 0, selectedCandidate.nirf10 || 0) + (selectedCandidate.researchScore10 || 0))), color: '#f59e0b' }
+                              ].filter(item => item.value > 0)}
+                              cx="50%"
+                              cy="50%"
+                              labelLine={false}
+                              label={({ name, value }) => `${name}: ${value.toFixed(1)}`}
+                              outerRadius={80}
+                              fill="#8884d8"
+                              dataKey="value"
+                            >
+                              {[
+                                { name: 'University Ranking', value: Math.max(selectedCandidate.qs10 || 0, selectedCandidate.nirf10 || 0), color: '#3b82f6' },
+                                { name: 'Research', value: selectedCandidate.researchScore10 || 0, color: '#10b981' },
+                                { name: 'Other', value: Math.max(0, (selectedCandidate.total_score || 0) - (Math.max(selectedCandidate.qs10 || 0, selectedCandidate.nirf10 || 0) + (selectedCandidate.researchScore10 || 0))), color: '#f59e0b' }
+                              ].filter(item => item.value > 0).map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.color} />
+                              ))}
+                            </Pie>
+                            <Tooltip />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+
+                      {/* Research Metrics Bar Chart */}
+                      {selectedCandidate.totalPapers > 0 && (
+                        <div className="bg-white border rounded-lg p-6 shadow-sm">
+                          <h3 className="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Research Metrics</h3>
+                          <ResponsiveContainer width="100%" height={200}>
+                            <BarChart
+                              data={[
+                                { 
+                                  name: 'Publications', 
+                                  count: selectedCandidate.totalPapers || 0 
+                                }
+                              ]}
+                            >
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="name" />
+                              <YAxis />
+                              <Tooltip />
+                              <Bar dataKey="count" fill="#8b5cf6" />
+                            </BarChart>
+                          </ResponsiveContainer>
+                          <div className="mt-4 text-center">
+                            <p className="text-sm text-gray-600">Total Publications</p>
+                            <p className="text-3xl font-bold text-purple-600">{selectedCandidate.totalPapers || 0}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Quick Stats Grid */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+                          <p className="text-xs font-semibold text-blue-600 uppercase mb-1">QS Score</p>
+                          <p className="text-2xl font-bold text-blue-700">{selectedCandidate.qs10 || 0}</p>
+                        </div>
+                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center">
+                          <p className="text-xs font-semibold text-orange-600 uppercase mb-1">NIRF Score</p>
+                          <p className="text-2xl font-bold text-orange-700">{selectedCandidate.nirf10 || 0}</p>
+                        </div>
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                          <p className="text-xs font-semibold text-green-600 uppercase mb-1">Research</p>
+                          <p className="text-2xl font-bold text-green-700">{selectedCandidate.researchScore10 || 0}</p>
+                        </div>
+                        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 text-center">
+                          <p className="text-xs font-semibold text-purple-600 uppercase mb-1">Papers</p>
+                          <p className="text-2xl font-bold text-purple-700">{selectedCandidate.totalPapers || 0}</p>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Footer Actions */}
+            <div className="flex justify-end gap-3 p-4 border-t bg-gray-50">
+              <button
+                onClick={closeCandidatePopup}
+                className="px-5 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-medium"
               >
                 Close
               </button>
               <button
-                onClick={() => console.log('Contact candidate:', selectedCandidate.name)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                onClick={() => console.log('Contact candidate:', selectedCandidate.email)}
+                className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
               >
                 Contact Candidate
               </button>
