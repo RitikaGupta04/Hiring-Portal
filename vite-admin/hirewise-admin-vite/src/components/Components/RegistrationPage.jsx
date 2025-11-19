@@ -132,10 +132,6 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
     setIsSubmitting(true);
     
     try {
-      // Sign out any existing session first to ensure clean state
-      await supabase.auth.signOut();
-      console.log('Signed out any existing session');
-      
       // 1) Register user (registerUser already handles signUp + auto session creation)
       const result = await registerUser({
         name: form.name,
@@ -147,7 +143,20 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
       console.log('Registration API successful:', result);
       
       // Wait a moment for Supabase session to be fully established
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Verify session is active
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('Session after registration:', session ? 'Active' : 'No session');
+      
+      if (!session) {
+        console.error('No session after registration - trying to sign in');
+        await supabase.auth.signInWithPassword({
+          email: form.email,
+          password: form.password
+        });
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
       
       console.log('Navigating to /application');
       
