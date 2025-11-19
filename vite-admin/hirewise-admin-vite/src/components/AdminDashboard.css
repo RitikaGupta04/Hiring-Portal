@@ -200,3 +200,24 @@ th {
   font-size: 20pt !important;
   font-family: Arial, sans-serif !important;
 }
+
+/* Extra-specific overrides for small utility classes inside headers (QS, NIRF, Papers buttons/badges) */
+.admin-dashboard thead th button,
+.admin-dashboard thead th .flex > button,
+.admin-dashboard thead th .flex .font-medium,
+.admin-dashboard thead th .text-xs,
+.admin-dashboard thead th .px-2,
+.admin-dashboard thead th .inline-flex,
+.admin-dashboard thead th .rounded-full,
+.admin-dashboard thead th .px-2 .font-medium {
+  font-size: 20pt !important;
+  line-height: 1 !important;
+  font-family: Arial, sans-serif !important;
+}
+
+/* Make dropdown menu button icons align with new size */
+.admin-dashboard thead th button svg,
+.admin-dashboard thead th svg {
+  width: 1.2em !important;
+  height: 1.2em !important;
+}
