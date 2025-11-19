@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase-client';
 import { API_BASE } from '../lib/config';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const AllCandidates = () => {
   const [selectedCandidate, setSelectedCandidate] = useState(null);
@@ -259,337 +260,357 @@ const AllCandidates = () => {
 
       {selectedCandidate && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-[80%] max-h-[95vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-800">
-                  {selectedCandidate.first_name} {selectedCandidate.last_name}
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-7xl max-h-[95vh] overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {selectedCandidate.first_name} {selectedCandidate.middle_name && `${selectedCandidate.middle_name} `}{selectedCandidate.last_name}
                 </h2>
-                <button
-                  onClick={closeModal}
-                  className="text-gray-400 hover:text-gray-600 text-2xl"
-                >
-                  ×
-                </button>
+                <div className="flex items-center space-x-2 mt-1">
+                  <p className="text-sm text-gray-600">{selectedCandidate.position}</p>
+                  <span className="text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                    {selectedCandidate.department}
+                  </span>
+                </div>
               </div>
-              <div className="mt-1 flex items-center space-x-2">
-                <p className="text-lg text-gray-600">{selectedCandidate.position}</p>
-                <span className="text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                  {selectedCandidate.department}
-                </span>
-              </div>
+              <button
+                onClick={closeModal}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-            
-            <div className="p-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h3 className="text-sm font-bold text-gray-800 mb-1">Email</h3>
-                  <p className="text-gray-600">{selectedCandidate.email}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-gray-800 mb-1">Phone</h3>
-                  <p className="text-gray-600">{selectedCandidate.phone}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-gray-800 mb-1">Experience</h3>
-                  <p className="text-gray-600">{selectedCandidate.experience}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-gray-800 mb-1">Address</h3>
-                  <p className="text-gray-600">{selectedCandidate.address || 'Not provided'}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-gray-800 mb-1">Department</h3>
-                  <p className="text-gray-600">{selectedCandidate.department}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-gray-800 mb-1">Publications</h3>
-                  <p className="text-gray-600">{selectedCandidate.publications}</p>
-                </div>
-                {selectedCandidate.gender && (
-                  <div>
-                    <h3 className="text-sm font-bold text-gray-800 mb-1">Gender</h3>
-                    <p className="text-gray-600">{selectedCandidate.gender}</p>
-                  </div>
-                )}
-                {selectedCandidate.date_of_birth && (
-                  <div>
-                    <h3 className="text-sm font-bold text-gray-800 mb-1">Date of Birth</h3>
-                    <p className="text-gray-600">{selectedCandidate.date_of_birth}</p>
-                  </div>
-                )}
-                {selectedCandidate.nationality && (
-                  <div>
-                    <h3 className="text-sm font-bold text-gray-800 mb-1">Nationality</h3>
-                    <p className="text-gray-600">{selectedCandidate.nationality}</p>
-                  </div>
-                )}
-              </div>
 
-              {(selectedCandidate.highest_degree || selectedCandidate.university) && (
-                <div>
-                  <h3 className="text-sm font-bold text-gray-800 mb-1">Education</h3>
-                  <p className="text-gray-600">
-                    {selectedCandidate.highest_degree} 
-                    {selectedCandidate.university && `, ${selectedCandidate.university}`}
-                    {selectedCandidate.graduation_year && ` (${selectedCandidate.graduation_year})`}
-                  </p>
-                </div>
-              )}
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+                {/* Left Side - Detailed Information */}
+                <div className="space-y-4">
+                  {/* Basic Info */}
+                  <div className="bg-white border rounded-lg p-4 shadow-sm">
+                    <h3 className="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Basic Information</h3>
+                    <div className="space-y-2">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-xs font-semibold text-gray-500 uppercase">Email</p>
+                          <p className="text-sm text-gray-900">{selectedCandidate.email}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-gray-500 uppercase">Phone</p>
+                          <p className="text-sm text-gray-900">{selectedCandidate.phone}</p>
+                        </div>
+                      </div>
+                      {selectedCandidate.address && (
+                        <div>
+                          <p className="text-xs font-semibold text-gray-500 uppercase">Address</p>
+                          <p className="text-sm text-gray-900">{selectedCandidate.address}</p>
+                        </div>
+                      )}
+                      <div className="grid grid-cols-3 gap-4">
+                        {selectedCandidate.gender && (
+                          <div>
+                            <p className="text-xs font-semibold text-gray-500 uppercase">Gender</p>
+                            <p className="text-sm text-gray-900">{selectedCandidate.gender}</p>
+                          </div>
+                        )}
+                        {selectedCandidate.date_of_birth && (
+                          <div>
+                            <p className="text-xs font-semibold text-gray-500 uppercase">Date of Birth</p>
+                            <p className="text-sm text-gray-900">{new Date(selectedCandidate.date_of_birth).toLocaleDateString()}</p>
+                          </div>
+                        )}
+                        {selectedCandidate.nationality && (
+                          <div>
+                            <p className="text-xs font-semibold text-gray-500 uppercase">Nationality</p>
+                            <p className="text-sm text-gray-900">{selectedCandidate.nationality}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
 
-              {selectedCandidate.previous_positions && (
-                <div>
-                  <h3 className="text-sm font-bold text-gray-800 mb-1">Previous Positions</h3>
-                  <p className="text-gray-600">{selectedCandidate.previous_positions}</p>
-                </div>
-              )}
-
-              <div>
-                <h3 className="text-sm font-bold text-gray-800 mb-1">Teaching Experience</h3>
-                {selectedCandidate.teachingExperiences.length > 0 ? (
-                  selectedCandidate.teachingExperiences.map((exp, index) => (
-                    <div key={index} className="mb-4 p-3 bg-gray-50 rounded-lg">
-                      <p className="font-medium">
-                        {exp.position || exp.teachingPost} at {exp.institution || exp.teachingInstitution}
+                  {/* Education */}
+                  <div className="bg-white border rounded-lg p-4 shadow-sm">
+                    <h3 className="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Education</h3>
+                    <div className="bg-indigo-50 rounded p-3">
+                      <p className="text-xs font-semibold text-indigo-600 uppercase">Highest Qualification</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {selectedCandidate.highest_degree || 'Not specified'}
                       </p>
-                      <p className="text-sm text-gray-600">
-                        {exp.start_date || exp.teachingStartDate} to {exp.end_date || exp.teachingEndDate}
-                      </p>
-                      {(exp.description || exp.teachingExperience) && (
-                        <p className="text-sm text-gray-600 mt-1">
-                          {exp.description || exp.teachingExperience}
-                        </p>
+                      {selectedCandidate.university && (
+                        <p className="text-xs text-gray-600">{selectedCandidate.university}</p>
+                      )}
+                      {selectedCandidate.graduation_year && (
+                        <p className="text-xs text-gray-600">Graduated: {selectedCandidate.graduation_year}</p>
                       )}
                     </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-gray-500">No teaching experience provided</p>
-                )}
-              </div>
+                  </div>
 
-              <div>
-                <h3 className="text-sm font-bold text-gray-800 mb-1">Research Experience</h3>
-                {selectedCandidate.researchExperiences.length > 0 ? (
-                  selectedCandidate.researchExperiences.map((exp, index) => (
-                    <div key={index} className="mb-4 p-3 bg-gray-50 rounded-lg">
-                      <p className="font-medium">
-                        {exp.position || exp.researchPost} at {exp.institution || exp.researchInstitution}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        {exp.start_date || exp.researchStartDate} to {exp.end_date || exp.researchEndDate}
-                      </p>
-                      {(exp.description || exp.researchExperience) && (
-                        <p className="text-sm text-gray-600 mt-1">
-                          {exp.description || exp.researchExperience}
-                        </p>
+                  {/* Experience */}
+                  <div className="bg-white border rounded-lg p-4 shadow-sm">
+                    <h3 className="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Experience</h3>
+                    <div className="bg-green-50 rounded p-3 mb-3">
+                      <p className="text-xs font-semibold text-green-600 uppercase">Total Experience</p>
+                      <p className="text-lg font-bold text-gray-900">{selectedCandidate.experience}</p>
+                    </div>
+
+                    {/* Teaching Experience */}
+                    {selectedCandidate.teachingExperiences && selectedCandidate.teachingExperiences.length > 0 && (
+                      <div className="mb-3">
+                        <p className="text-xs font-bold text-gray-700 uppercase mb-2">Teaching Experience</p>
+                        {selectedCandidate.teachingExperiences.slice(0, 2).map((exp, index) => (
+                          <div key={index} className="border-l-4 border-blue-500 pl-3 mb-2">
+                            <p className="text-sm font-medium text-gray-900">
+                              {exp.position || exp.teachingPost || 'Position not specified'}
+                            </p>
+                            <p className="text-xs text-gray-600">
+                              {exp.institution || exp.teachingInstitution || 'Institution not specified'}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {exp.start_date || exp.teachingStartDate || 'N/A'} - {exp.end_date || exp.teachingEndDate || 'Present'}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Research Experience */}
+                    {selectedCandidate.researchExperiences && selectedCandidate.researchExperiences.length > 0 && (
+                      <div>
+                        <p className="text-xs font-bold text-gray-700 uppercase mb-2">Research Experience</p>
+                        {selectedCandidate.researchExperiences.slice(0, 2).map((exp, index) => (
+                          <div key={index} className="border-l-4 border-green-500 pl-3 mb-2">
+                            <p className="text-sm font-medium text-gray-900">
+                              {exp.position || exp.researchPost || 'Position not specified'}
+                            </p>
+                            <p className="text-xs text-gray-600">
+                              {exp.institution || exp.researchInstitution || 'Institution not specified'}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {exp.start_date || exp.researchStartDate || 'N/A'} - {exp.end_date || exp.researchEndDate || 'Present'}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Research IDs */}
+                  <div className="bg-white border rounded-lg p-4 shadow-sm">
+                    <h3 className="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Research Identifiers</h3>
+                    <div className="space-y-2">
+                      {selectedCandidate.researchInfo?.scopus_id && (
+                        <div>
+                          <p className="text-xs font-semibold text-gray-500 uppercase">Scopus ID</p>
+                          <p className="text-sm text-gray-900">{selectedCandidate.researchInfo.scopus_id}</p>
+                        </div>
+                      )}
+                      {selectedCandidate.researchInfo?.google_scholar_id && (
+                        <div>
+                          <p className="text-xs font-semibold text-gray-500 uppercase">Google Scholar ID</p>
+                          <p className="text-sm text-gray-900">{selectedCandidate.researchInfo.google_scholar_id}</p>
+                        </div>
+                      )}
+                      {selectedCandidate.researchInfo?.orchid_id && (
+                        <div>
+                          <p className="text-xs font-semibold text-gray-500 uppercase">ORCID</p>
+                          <p className="text-sm text-gray-900">{selectedCandidate.researchInfo.orchid_id}</p>
+                        </div>
                       )}
                     </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-gray-500">No research experience provided</p>
-                )}
-              </div>
-
-              <div>
-                <h3 className="text-sm font-bold text-gray-800 mb-1">Research Information</h3>
-                <div className="grid grid-cols-2 gap-4 p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <h4 className="text-xs font-semibold text-gray-600">Scopus Papers</h4>
-                    <p>{selectedCandidate.researchInfo?.scopus_general_papers ?? 0}</p>
                   </div>
-                  <div>
-                    <h4 className="text-xs font-semibold text-gray-600">Conference Papers</h4>
-                    <p>{selectedCandidate.researchInfo?.conference_papers ?? 0}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-semibold text-gray-600">Edited Books</h4>
-                    <p>{selectedCandidate.researchInfo?.edited_books ?? 0}</p>
-                  </div>
-                  {selectedCandidate.researchInfo?.scopus_id && (
-                    <div>
-                      <h4 className="text-xs font-semibold text-gray-600">Scopus ID</h4>
-                      <p>{selectedCandidate.researchInfo.scopus_id}</p>
-                    </div>
-                  )}
-                  {selectedCandidate.researchInfo?.google_scholar_id && (
-                    <div>
-                      <h4 className="text-xs font-semibold text-gray-600">Google Scholar ID</h4>
-                      <p>{selectedCandidate.researchInfo.google_scholar_id}</p>
-                    </div>
-                  )}
-                  {selectedCandidate.researchInfo?.orchid_id && (
-                    <div>
-                      <h4 className="text-xs font-semibold text-gray-600">ORCID ID</h4>
-                      <p>{selectedCandidate.researchInfo.orchid_id}</p>
-                    </div>
-                  )}
                 </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                {selectedCandidate.cv_path && (
-                  <div>
-                    <h3 className="text-sm font-bold text-gray-800 mb-1">CV</h3>
-                    <a
-                      href={`${supabase.storage.from('application-reports').getPublicUrl(selectedCandidate.cv_path).data.publicUrl}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
-                    >
-                      Download CV
-                    </a>
+                {/* Right Side - Visual Analytics */}
+                <div className="space-y-4">
+                  {/* Research Metrics Overview */}
+                  <div className="bg-gradient-to-br from-purple-50 to-indigo-100 border-2 border-indigo-200 rounded-lg p-4 shadow-lg">
+                    <h3 className="text-lg font-bold text-gray-900 mb-3 text-center">Research Metrics</h3>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="bg-white rounded-lg p-3 text-center shadow">
+                        <p className="text-xs font-semibold text-purple-600 uppercase mb-1">Scopus</p>
+                        <p className="text-3xl font-bold text-purple-700">{selectedCandidate.researchInfo?.scopus_general_papers ?? 0}</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-3 text-center shadow">
+                        <p className="text-xs font-semibold text-blue-600 uppercase mb-1">Conference</p>
+                        <p className="text-3xl font-bold text-blue-700">{selectedCandidate.researchInfo?.conference_papers ?? 0}</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-3 text-center shadow">
+                        <p className="text-xs font-semibold text-green-600 uppercase mb-1">Books</p>
+                        <p className="text-3xl font-bold text-green-700">{selectedCandidate.researchInfo?.edited_books ?? 0}</p>
+                      </div>
+                    </div>
                   </div>
-                )}
-                {!selectedCandidate.cv_path && (
-                  <div>
-                    <h3 className="text-sm font-bold text-gray-800 mb-1">CV</h3>
-                    <p className="text-gray-500">Not provided</p>
-                  </div>
-                )}
-                {selectedCandidate.cover_letter_path && (
-                  <div>
-                    <h3 className="text-sm font-bold text-gray-800 mb-1">Cover Letter</h3>
-                    <a
-                      href={`${supabase.storage.from('application-reports').getPublicUrl(selectedCandidate.cover_letter_path).data.publicUrl}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
-                    >
-                      Download Cover Letter
-                    </a>
-                  </div>
-                )}
-                {!selectedCandidate.cover_letter_path && (
-                  <div>
-                    <h3 className="text-sm font-bold text-gray-800 mb-1">Cover Letter</h3>
-                    <p className="text-gray-500">Not provided</p>
-                  </div>
-                )}
-                {selectedCandidate.teaching_statement_path && (
-                  <div>
-                    <h3 className="text-sm font-bold text-gray-800 mb-1">Teaching Statement</h3>
-                    <a
-                      href={`${supabase.storage.from('application-reports').getPublicUrl(selectedCandidate.teaching_statement_path).data.publicUrl}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
-                    >
-                      Download Teaching Statement
-                    </a>
-                  </div>
-                )}
-                {!selectedCandidate.teaching_statement_path && (
-                  <div>
-                    <h3 className="text-sm font-bold text-gray-800 mb-1">Teaching Statement</h3>
-                    <p className="text-gray-500">Not provided</p>
-                  </div>
-                )}
-                {selectedCandidate.research_statement_path && (
-                  <div>
-                    <h3 className="text-sm font-bold text-gray-800 mb-1">Research Statement</h3>
-                    <a
-                      href={`${supabase.storage.from('application-reports').getPublicUrl(selectedCandidate.research_statement_path).data.publicUrl}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
-                    >
-                      Download Research Statement
-                    </a>
-                  </div>
-                )}
-                {!selectedCandidate.research_statement_path && (
-                  <div>
-                    <h3 className="text-sm font-bold text-gray-800 mb-1">Research Statement</h3>
-                    <p className="text-gray-500">Not provided</p>
-                  </div>
-                )}
-                {selectedCandidate.other_publications_path && (
-                  <div>
-                    <h3 className="text-sm font-bold text-gray-800 mb-1">Top 3 Publications (Compiled)</h3>
-                    <a
-                      href={`${supabase.storage.from('application-reports').getPublicUrl(selectedCandidate.other_publications_path).data.publicUrl}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
-                    >
-                      Download Publications PDF
-                    </a>
-                  </div>
-                )}
-                {!selectedCandidate.other_publications_path && (
-                  <div>
-                    <h3 className="text-sm font-bold text-gray-800 mb-1">Top 3 Publications (Compiled)</h3>
-                    <p className="text-gray-500">Not provided</p>
-                  </div>
-                )}
-              </div>
 
-              {/* Upload Missing Documents (Admin quick attach) */}
-              <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-gray-800">Upload Missing Documents</h3>
-                  <button
-                    className="text-sm px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                    onClick={() => setShowUpload(!showUpload)}
-                  >
-                    {showUpload ? 'Hide' : 'Show'}
-                  </button>
-                </div>
-                {showUpload && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-600 mb-1">CV</label>
-                      <input type="file" onChange={(e) => onFileChange(e, 'cv')} />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-600 mb-1">Cover Letter</label>
-                      <input type="file" onChange={(e) => onFileChange(e, 'coverLetter')} />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-600 mb-1">Teaching Statement</label>
-                      <input type="file" onChange={(e) => onFileChange(e, 'teachingStatement')} />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-600 mb-1">Research Statement</label>
-                      <input type="file" onChange={(e) => onFileChange(e, 'researchStatement')} />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-600 mb-1">Top 3 Publications (PDF)</label>
-                      <input type="file" onChange={(e) => onFileChange(e, 'otherPublications')} />
-                    </div>
-                    <div className="flex items-end">
-                      <button
-                        disabled={uploading}
-                        onClick={uploadDocuments}
-                        className={`px-4 py-2 text-white rounded ${uploading ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'}`}
+                  {/* Publications Distribution Pie Chart */}
+                  <div className="bg-white border rounded-lg p-4 shadow-sm">
+                    <h3 className="text-sm font-bold text-gray-900 mb-2">Publications Distribution</h3>
+                    <ResponsiveContainer width="100%" height={200}>
+                      <PieChart>
+                        <Pie
+                          data={[
+                            { name: 'Scopus Papers', value: selectedCandidate.researchInfo?.scopus_general_papers || 0, color: '#8b5cf6' },
+                            { name: 'Conference Papers', value: selectedCandidate.researchInfo?.conference_papers || 0, color: '#3b82f6' },
+                            { name: 'Edited Books', value: selectedCandidate.researchInfo?.edited_books || 0, color: '#10b981' }
+                          ].filter(item => item.value > 0)}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, value }) => `${name}: ${value}`}
+                          outerRadius={70}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {[
+                            { name: 'Scopus Papers', value: selectedCandidate.researchInfo?.scopus_general_papers || 0, color: '#8b5cf6' },
+                            { name: 'Conference Papers', value: selectedCandidate.researchInfo?.conference_papers || 0, color: '#3b82f6' },
+                            { name: 'Edited Books', value: selectedCandidate.researchInfo?.edited_books || 0, color: '#10b981' }
+                          ].filter(item => item.value > 0).map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* Publications Bar Chart */}
+                  <div className="bg-white border rounded-lg p-4 shadow-sm">
+                    <h3 className="text-sm font-bold text-gray-900 mb-2">Research Output</h3>
+                    <ResponsiveContainer width="100%" height={180}>
+                      <BarChart
+                        data={[
+                          { name: 'Scopus', count: selectedCandidate.researchInfo?.scopus_general_papers || 0, fill: '#8b5cf6' },
+                          { name: 'Conference', count: selectedCandidate.researchInfo?.conference_papers || 0, fill: '#3b82f6' },
+                          { name: 'Books', count: selectedCandidate.researchInfo?.edited_books || 0, fill: '#10b981' }
+                        ]}
                       >
-                        {uploading ? 'Uploading…' : 'Upload & Attach'}
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                        <YAxis tick={{ fontSize: 12 }} />
+                        <Tooltip />
+                        <Bar dataKey="count" radius={[8, 8, 0, 0]}>
+                          {[
+                            { name: 'Scopus', count: selectedCandidate.researchInfo?.scopus_general_papers || 0, fill: '#8b5cf6' },
+                            { name: 'Conference', count: selectedCandidate.researchInfo?.conference_papers || 0, fill: '#3b82f6' },
+                            { name: 'Books', count: selectedCandidate.researchInfo?.edited_books || 0, fill: '#10b981' }
+                          ].map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* Documents */}
+                  <div className="bg-white border rounded-lg p-4 shadow-sm">
+                    <h3 className="text-sm font-bold text-gray-900 mb-3">Documents</h3>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="bg-gray-50 rounded p-2">
+                        <p className="text-xs font-semibold text-gray-600">CV</p>
+                        {selectedCandidate.cv_path ? (
+                          <a
+                            href={`${supabase.storage.from('application-reports').getPublicUrl(selectedCandidate.cv_path).data.publicUrl}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-blue-600 hover:underline"
+                          >
+                            Download
+                          </a>
+                        ) : (
+                          <p className="text-xs text-gray-400">Not provided</p>
+                        )}
+                      </div>
+                      <div className="bg-gray-50 rounded p-2">
+                        <p className="text-xs font-semibold text-gray-600">Cover Letter</p>
+                        {selectedCandidate.cover_letter_path ? (
+                          <a
+                            href={`${supabase.storage.from('application-reports').getPublicUrl(selectedCandidate.cover_letter_path).data.publicUrl}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-blue-600 hover:underline"
+                          >
+                            Download
+                          </a>
+                        ) : (
+                          <p className="text-xs text-gray-400">Not provided</p>
+                        )}
+                      </div>
+                      <div className="bg-gray-50 rounded p-2">
+                        <p className="text-xs font-semibold text-gray-600">Teaching Statement</p>
+                        {selectedCandidate.teaching_statement_path ? (
+                          <a
+                            href={`${supabase.storage.from('application-reports').getPublicUrl(selectedCandidate.teaching_statement_path).data.publicUrl}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-blue-600 hover:underline"
+                          >
+                            Download
+                          </a>
+                        ) : (
+                          <p className="text-xs text-gray-400">Not provided</p>
+                        )}
+                      </div>
+                      <div className="bg-gray-50 rounded p-2">
+                        <p className="text-xs font-semibold text-gray-600">Research Statement</p>
+                        {selectedCandidate.research_statement_path ? (
+                          <a
+                            href={`${supabase.storage.from('application-reports').getPublicUrl(selectedCandidate.research_statement_path).data.publicUrl}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-blue-600 hover:underline"
+                          >
+                            Download
+                          </a>
+                        ) : (
+                          <p className="text-xs text-gray-400">Not provided</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Status Update Section */}
+                  <div className="bg-white border rounded-lg p-4 shadow-sm">
+                    <h3 className="text-sm font-bold text-gray-900 mb-3">Application Status</h3>
+                    <div className="flex items-center space-x-2">
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        selectedCandidate.status === 'approved' ? 'bg-green-100 text-green-700' :
+                        selectedCandidate.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                        'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        {selectedCandidate.status || 'Pending'}
+                      </span>
+                      <button
+                        onClick={() => handleStatusUpdate(selectedCandidate.id, 'approved')}
+                        className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-xs"
+                        disabled={updatingStatus}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => handleStatusUpdate(selectedCandidate.id, 'rejected')}
+                        className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-xs"
+                        disabled={updatingStatus}
+                      >
+                        Reject
                       </button>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
+            </div>
 
-              <div className="flex space-x-3 pt-4 border-t border-gray-200">
-                <button
-                  disabled={updatingStatus}
-                  onClick={() => updateApplicationStatus('in_review')}
-                  className={`flex-1 text-white py-2 px-4 rounded-lg transition-colors ${updatingStatus ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'}`}
-                >
-                  {updatingStatus ? 'Updating…' : 'Accept'}
-                </button>
-                <button
-                  disabled={updatingStatus}
-                  onClick={() => updateApplicationStatus('rejected')}
-                  className={`flex-1 text-white py-2 px-4 rounded-lg transition-colors ${updatingStatus ? 'bg-green-400' : 'bg-green-600 hover:bg-green-700'}`}
-                >
-                  {updatingStatus ? 'Updating…' : 'Reject'}
-                </button>
-                
-                <button onClick={closeModal} className="bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded-lg transition-colors">
-                  Close
-                </button>
-              </div>
+            {/* Footer */}
+            <div className="flex justify-end gap-3 p-4 border-t bg-gray-50">
+              <button
+                onClick={closeModal}
+                className="px-5 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-medium"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
