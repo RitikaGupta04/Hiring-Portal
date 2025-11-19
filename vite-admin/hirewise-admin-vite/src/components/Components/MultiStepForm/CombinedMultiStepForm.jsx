@@ -2050,39 +2050,40 @@ const CombinedMultiStepForm = () => {
             </div>
           </div>
         </div>
-        <div className="profile-display" style={{ marginLeft: 'auto' }}>
+        <div className="profile-display" style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '15px' }}>
           {loading ? (
             <div>Loading...</div>
           ) : error ? (
             <div className="error">Error: {error}</div>
           ) : (
             <>
-              {fullName && (
-                <div
-                  className="user-name"
-                  style={{
-                    fontWeight: '600',
-                    fontSize: '1.1rem',
-                    color: '#333',
-                    fontFamily: 'Arial, sans-serif',
-                  }}
-                >
-                  Welcome, <span style={{ fontWeight: '700', color: '#000' }}>{fullName}</span>
-                </div>
-              )}
-              {formData.position && (
-                <div
-                  className="user-position"
-                  style={{
-                    fontWeight: '500',
-                    fontSize: '1.05rem',
-                    color: '#333',
-                    marginTop: '2px',
-                    fontFamily: 'Arial, sans-serif',
-                  }}
-                >
-                  Position: <span style={{ fontWeight: '600' }}>
-                    {typeof formData.position === 'string'
+              <div>
+                {fullName && (
+                  <div
+                    className="user-name"
+                    style={{
+                      fontWeight: '600',
+                      fontSize: '1.1rem',
+                      color: '#333',
+                      fontFamily: 'Arial, sans-serif',
+                    }}
+                  >
+                    Welcome, <span style={{ fontWeight: '700', color: '#000' }}>{fullName}</span>
+                  </div>
+                )}
+                {formData.position && (
+                  <div
+                    className="user-position"
+                    style={{
+                      fontWeight: '500',
+                      fontSize: '1.05rem',
+                      color: '#333',
+                      marginTop: '2px',
+                      fontFamily: 'Arial, sans-serif',
+                    }}
+                  >
+                    Position: <span style={{ fontWeight: '600' }}>
+                      {typeof formData.position === 'string'
                       ? formData.position.charAt(0).toUpperCase() + formData.position.slice(1)
                       : formData.position}
                   </span>
@@ -2091,6 +2092,25 @@ const CombinedMultiStepForm = () => {
                   )}
                 </div>
               )}
+              <button
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  window.location.href = '/';
+                }}
+                style={{
+                  marginLeft: '15px',
+                  padding: '8px 16px',
+                  background: '#dc3545',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                }}
+              >
+                Logout
+              </button>
             </>
           )}
         </div>
