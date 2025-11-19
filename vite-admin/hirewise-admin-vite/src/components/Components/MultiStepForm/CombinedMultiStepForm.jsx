@@ -617,7 +617,7 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
             <option value="">Select Degree</option>
             {formData.department === 'engineering' && (
               <>
-                <option value="B.Tech in Computer Science">B.Tech in Computer Science</option>
+                <option value="B.Tech in Computer Science & Engineering">B.Tech in Computer Science & Engineering</option>
                 <option value="B.Tech in Mechanical Engineering">B.Tech in Mechanical Engineering</option>
                 <option value="B.Tech in Electronics & Communication">B.Tech in Electronics & Communication</option>
               </>
