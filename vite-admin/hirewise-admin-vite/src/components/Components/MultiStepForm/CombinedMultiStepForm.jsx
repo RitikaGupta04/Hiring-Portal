@@ -1537,6 +1537,7 @@ const ResearchInformation = ({ formData, setFormData, onNext, onPrevious, onSave
             id="scopus_general_papers"
             name="scopus_general_papers"
             value={formData.scopus_general_papers || ''}
+            min="0"
             onChange={handleInputChange}
           />
           {errors.scopus_general_papers && <span className="error">{errors.scopus_general_papers}</span>}
@@ -1548,6 +1549,7 @@ const ResearchInformation = ({ formData, setFormData, onNext, onPrevious, onSave
             id="conference_papers"
             name="conference_papers"
             value={formData.conference_papers || ''}
+            min="0"
             onChange={handleInputChange}
           />
           {errors.conference_papers && <span className="error">{errors.conference_papers}</span>}
@@ -1559,6 +1561,7 @@ const ResearchInformation = ({ formData, setFormData, onNext, onPrevious, onSave
             id="edited_books"
             name="edited_books"
             value={formData.edited_books || ''}
+            min="0"
             onChange={handleInputChange}
           />
           {errors.edited_books && <span className="error">{errors.edited_books}</span>}
