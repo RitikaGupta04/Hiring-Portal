@@ -1,10 +1,11 @@
 // src/App.jsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import RegistrationPage from './components/Components/RegistrationPage';
 import AdminApp from './components/AdminLayout';
 import CombinedMultiStepForm from './components/Components/MultiStepForm/CombinedMultiStepForm';
 import ProtectedRoute from './components/Components/ProtectedRoute/ProtectedRoute';
+import { API_BASE } from './lib/config';
 import './App.css';
 
 // ✅ Dynamic BASE_URL: localhost for development, Render for production
@@ -13,6 +14,24 @@ const BASE_URL = import.meta.env.MODE === 'production'
   : "http://localhost:5173";
 
 function App() {
+  // Wake up backend server as soon as app loads (any page)
+  useEffect(() => {
+    const wakeBackend = async () => {
+      try {
+        // Fire-and-forget request to wake up Render backend
+        fetch(`${API_BASE}/api`, { 
+          method: 'GET'
+        }).catch(() => {
+          // Silent fail - backend will wake up eventually
+          console.log('Backend warming up...');
+        });
+      } catch (err) {
+        // Ignore errors - this is just pre-warming
+      }
+    };
+    
+    wakeBackend();
+  }, []);
   // Optional: Only fetch backend data if needed (e.g., for admin dashboard)
   // If you don't use `backendData`, you can remove this useEffect entirely
   /*

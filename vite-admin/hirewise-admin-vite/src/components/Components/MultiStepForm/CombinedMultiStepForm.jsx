@@ -1064,21 +1064,28 @@ const Experience = ({ formData, setFormData, onNext, onPrevious, onSaveExit }) =
   const validateForm = () => {
     const newErrors = { teaching: [], research: [] };
     const today = new Date().toISOString().split('T')[0];
+    
+    // Only validate teaching experiences that have ANY data entered
     (formData.teachingExperiences || []).forEach((exp, idx) => {
       const entryErrors = {};
-      // Check if institution is "Other" but no custom value provided
-      if (exp.teachingInstitution === 'Other' && !exp.teachingInstitutionOther?.trim()) {
-        entryErrors.teachingInstitution = 'Please specify your institution';
-      }
-      if (exp.teachingStartDate && exp.teachingStartDate > today) {
-        entryErrors.teachingStartDate = 'Start date cannot be in the future';
-      }
-      if (exp.teachingEndDate && exp.teachingEndDate > today) {
-        entryErrors.teachingEndDate = 'End date cannot be in the future';
-      }
-      // Validate end date is after start date
-      if (exp.teachingStartDate && exp.teachingEndDate && exp.teachingEndDate < exp.teachingStartDate) {
-        entryErrors.teachingEndDate = 'End date must be after start date';
+      const hasAnyData = exp.teachingPost || exp.teachingInstitution || exp.teachingStartDate || exp.teachingEndDate;
+      
+      // Only validate if user started entering data
+      if (hasAnyData) {
+        // Check if institution is "Other" but no custom value provided
+        if (exp.teachingInstitution === 'Other' && !exp.teachingInstitutionOther?.trim()) {
+          entryErrors.teachingInstitution = 'Please specify your institution';
+        }
+        if (exp.teachingStartDate && exp.teachingStartDate > today) {
+          entryErrors.teachingStartDate = 'Start date cannot be in the future';
+        }
+        if (exp.teachingEndDate && exp.teachingEndDate > today) {
+          entryErrors.teachingEndDate = 'End date cannot be in the future';
+        }
+        // Validate end date is after start date
+        if (exp.teachingStartDate && exp.teachingEndDate && exp.teachingEndDate < exp.teachingStartDate) {
+          entryErrors.teachingEndDate = 'End date must be after start date';
+        }
       }
       newErrors.teaching[idx] = entryErrors;
     });
