@@ -303,7 +303,7 @@ const getPositionFilterOptions = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 w-full flex flex-col">
+    <div className="admin-dashboard min-h-screen bg-gray-50 w-full flex flex-col">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="px-6 py-3 flex items-center justify-between">
