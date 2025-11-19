@@ -156,8 +156,8 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
       
       console.log('Sign in successful, session created:', data.session?.user?.email);
       
-      // Wait a moment for session to be fully established
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Quick check to ensure session is active
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       console.log('Navigating to /application');
       

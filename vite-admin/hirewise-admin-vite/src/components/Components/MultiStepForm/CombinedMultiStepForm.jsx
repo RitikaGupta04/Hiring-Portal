@@ -2055,11 +2055,11 @@ const CombinedMultiStepForm = () => {
     }
     
     // Show warning about Render cold start
-    console.log('⏳ Submitting to backend... (This may take up to 60 seconds on first request)');
+    console.log('⏳ Submitting to backend...');
     
-    // Add timeout of 90 seconds for Render cold starts
+    // Add timeout of 30 seconds
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 90000);
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
     
     console.log('🌐 Making fetch request...');
     const response = await fetch(API_BASE + '/api/applications', {
@@ -2088,10 +2088,8 @@ const CombinedMultiStepForm = () => {
     console.log('✅ Submission successful:', result);
     alert('✅ Application submitted successfully!\n\n' + (result.message || 'Your application is being processed. You will receive confirmation via email.'));
     
-    // Navigate to thank you page or dashboard
-    setTimeout(() => {
-      navigate('/register');
-    }, 1500);
+    // Navigate to thank you page immediately
+    navigate('/register');
   } catch (err) {
     console.error('❌ Submission error:', err);
     // Only show alert if we haven't already shown one above
