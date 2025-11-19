@@ -25,7 +25,7 @@ const PositionSelection = ({ formData, setFormData, onNext, onSaveExit }) => {
     { id: 'lab', name: 'Lab Assistants' },
   ];
   const engineeringBranches = [
-    { id: 'cse', name: 'Computer Science Engineering' },
+    { id: 'cse', name: 'Computer Science & Engineering' },
     { id: 'mech', name: 'Mechanical Engineering' },
     { id: 'ece', name: 'Electronics and Communication Engineering' },
   ];
