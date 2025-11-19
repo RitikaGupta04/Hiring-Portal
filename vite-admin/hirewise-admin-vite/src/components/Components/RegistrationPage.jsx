@@ -129,6 +129,7 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
     }
 
     setIsSubmitting(true);
+    setGeneralFormError('⏳ Connecting to server... This may take up to 45 seconds on first use.');
     
     try {
       // 1) Register user via backend API
@@ -138,6 +139,9 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
         phone: `${form.countryCode} ${form.phone}`,
         password: form.password
       });
+      
+      // Clear the waiting message
+      setGeneralFormError('');
       
       // 2) Sign in on the frontend to create session
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -159,8 +163,8 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
       const errorMessage = err.message || 'Registration failed';
       
       // Show user-friendly messages for common errors
-      if (errorMessage.includes('sleeping') || errorMessage.includes('taking too long')) {
-        setGeneralFormError('⏳ Server is starting up (this happens on free hosting). Please wait 30 seconds and try again.');
+      if (errorMessage.includes('waking up') || errorMessage.includes('sleeping') || errorMessage.includes('taking too long')) {
+        setGeneralFormError('⏳ Server is still starting. Please wait 1 minute and click APPLY NOW again.');
       } else if (errorMessage.includes('422')) {
         setGeneralFormError('Server validation error. Please check all fields are filled correctly.');
       } else if (errorMessage.includes('already registered') || errorMessage.includes('already exists')) {

@@ -6,9 +6,9 @@ export async function registerUser({ name, email, phone, password }) {
   console.log('Calling registration API:', `${API_BASE}/api/auth/register`);
   
   try {
-    // Add 15 second timeout for registration
+    // Add 45 second timeout for registration (Render free tier needs time to wake up)
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const timeoutId = setTimeout(() => controller.abort(), 45000);
     
     const res = await fetch(`${API_BASE}/api/auth/register`, {
       method: 'POST',
@@ -28,7 +28,7 @@ export async function registerUser({ name, email, phone, password }) {
     return data.user;
   } catch (err) {
     if (err.name === 'AbortError') {
-      throw new Error('Registration is taking too long. The server may be sleeping. Please try again in a minute.');
+      throw new Error('Server is still waking up (takes 30-45 seconds on first use). Please wait and try again.');
     }
     throw err;
   }
