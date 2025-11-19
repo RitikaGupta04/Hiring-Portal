@@ -132,6 +132,10 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
     setIsSubmitting(true);
     
     try {
+      // Sign out any existing session first to ensure clean state
+      await supabase.auth.signOut();
+      console.log('Signed out any existing session');
+      
       // 1) Register user (registerUser already handles signUp + auto session creation)
       const result = await registerUser({
         name: form.name,
