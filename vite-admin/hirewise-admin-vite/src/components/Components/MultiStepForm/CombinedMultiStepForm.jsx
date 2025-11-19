@@ -695,13 +695,13 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
           >
             <option value="percentage">Percentage (Out of 100)</option>
             <option value="cgpa10">CGPA (Out of 10)</option>
-            <option value="cgpa5">CGPA (Out of 5)</option>
+            <option value="cgpa4">CGPA (Out of 4)</option>
           </select>
         </div>
         <div className="form-field">
           <label htmlFor="bachelorCgpa">
             {formData.bachelorCgpaScale === 'percentage' ? 'Percentage*' : 
-             formData.bachelorCgpaScale === 'cgpa10' ? 'CGPA (Out of 10)*' : 'CGPA (Out of 5)*'}
+             formData.bachelorCgpaScale === 'cgpa10' ? 'CGPA (Out of 10)*' : 'CGPA (Out of 4)*'}
           </label>
           <input
             type="number"
@@ -711,10 +711,10 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
             onChange={handleInputChange}
             min="0"
             max={formData.bachelorCgpaScale === 'percentage' ? '100' : 
-                 formData.bachelorCgpaScale === 'cgpa10' ? '10' : '5'}
+                 formData.bachelorCgpaScale === 'cgpa10' ? '10' : '4'}
             step="0.01"
             placeholder={formData.bachelorCgpaScale === 'percentage' ? 'Enter 0-100' : 
-                        formData.bachelorCgpaScale === 'cgpa10' ? 'Enter 0-10' : 'Enter 0-5'}
+                        formData.bachelorCgpaScale === 'cgpa10' ? 'Enter 0-10' : 'Enter 0-4'}
           />
           {errors.bachelorCgpa && <span className="error">{errors.bachelorCgpa}</span>}
         </div>
@@ -823,13 +823,13 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
           >
             <option value="percentage">Percentage (Out of 100)</option>
             <option value="cgpa10">CGPA (Out of 10)</option>
-            <option value="cgpa5">CGPA (Out of 5)</option>
+            <option value="cgpa4">CGPA (Out of 4)</option>
           </select>
         </div>
         <div className="form-field">
           <label htmlFor="masterCgpa">
             {formData.masterCgpaScale === 'percentage' ? 'Percentage*' : 
-             formData.masterCgpaScale === 'cgpa10' ? 'CGPA (Out of 10)*' : 'CGPA (Out of 5)*'}
+             formData.masterCgpaScale === 'cgpa10' ? 'CGPA (Out of 10)*' : 'CGPA (Out of 4)*'}
           </label>
           <input
             type="number"
@@ -839,10 +839,10 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
             onChange={handleInputChange}
             min="0"
             max={formData.masterCgpaScale === 'percentage' ? '100' : 
-                 formData.masterCgpaScale === 'cgpa10' ? '10' : '5'}
+                 formData.masterCgpaScale === 'cgpa10' ? '10' : '4'}
             step="0.01"
             placeholder={formData.masterCgpaScale === 'percentage' ? 'Enter 0-100' : 
-                        formData.masterCgpaScale === 'cgpa10' ? 'Enter 0-10' : 'Enter 0-5'}
+                        formData.masterCgpaScale === 'cgpa10' ? 'Enter 0-10' : 'Enter 0-4'}
           />
           {errors.masterCgpa && <span className="error">{errors.masterCgpa}</span>}
         </div>
