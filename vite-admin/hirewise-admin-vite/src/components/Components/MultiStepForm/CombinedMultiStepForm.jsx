@@ -262,7 +262,7 @@ const PersonalInformation = ({ formData, setFormData, onNext, onPrevious, onSave
       if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
       
       if (age < 21) newErrors.dateOfBirth = 'You must be at least 21 years old';
-      else if (age > 80) newErrors.dateOfBirth = 'Age cannot exceed 80 years';
+      else if (age > 75) newErrors.dateOfBirth = 'You must be born after 1950 (maximum age is 75 years)';
       
       // Check if date is in the future
       if (birthDate > today) newErrors.dateOfBirth = 'Date of Birth cannot be in the future';
@@ -396,7 +396,7 @@ const PersonalInformation = ({ formData, setFormData, onNext, onPrevious, onSave
             onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
             min={(() => {
               const date = new Date();
-              date.setFullYear(date.getFullYear() - 80);
+              date.setFullYear(date.getFullYear() - 75);
               return date.toISOString().split('T')[0];
             })()}
             max={(() => {
@@ -456,11 +456,13 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
       bachelorInstituteOther: prev.bachelorInstituteOther || '',
       bachelorDegreeName: prev.bachelorDegreeName || '',
       bachelorYear: prev.bachelorYear || '',
+      bachelorCgpaScale: prev.bachelorCgpaScale || 'percentage',
       bachelorCgpa: prev.bachelorCgpa || '',
       masterInstitute: prev.masterInstitute || '',
       masterInstituteOther: prev.masterInstituteOther || '',
       masterDegreeName: prev.masterDegreeName || '',
       masterYear: prev.masterYear || '',
+      masterCgpaScale: prev.masterCgpaScale || 'percentage',
       masterCgpa: prev.masterCgpa || '',
       phdStatus: prev.phdStatus || 'Not done',
       phdInstitute: prev.phdInstitute || '',
@@ -911,7 +913,8 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
               name="phdYear"
               value={formData.phdYear || ''}
               onChange={handleInputChange}
-              max={formData.phdStatus === 'Awarded' ? new Date().getFullYear() : undefined}
+              min="1950"
+              max={formData.phdStatus === 'Awarded' ? new Date().getFullYear() : 2050}
             />
             {errors.phdYear && <span className="error">{errors.phdYear}</span>}
           </div>
