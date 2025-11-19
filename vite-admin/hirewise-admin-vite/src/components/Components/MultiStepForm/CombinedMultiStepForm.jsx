@@ -155,7 +155,7 @@ const PositionSelection = ({ formData, setFormData, onNext, onSaveExit }) => {
       </div>
       {formData.position === 'teaching' && (
         <div className="form-field">
-          <label htmlFor="branch">Department*</label>
+          <label htmlFor="branch">Department/Domain*</label>
           <select
             id="branch"
             value={formData.branch}
