@@ -606,6 +606,61 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
         </div>
         <div className="form-field">
           <label htmlFor="bachelorDegreeName">Degree Name*</label>
+          <select
+            id="bachelorDegreeName"
+            name="bachelorDegreeName"
+            value={formData.bachelorDegreeName || ''}
+            onChange={handleInputChange}
+          >
+            <option value="">Select Degree</option>
+            {formData.department === 'engineering' && (
+              <>
+                <option value="B.Tech in Computer Science">B.Tech in Computer Science</option>
+                <option value="B.Tech in Mechanical Engineering">B.Tech in Mechanical Engineering</option>
+                <option value="B.Tech in Electronics & Communication">B.Tech in Electronics & Communication</option>
+              </>
+            )}
+            {formData.department === 'management' && (
+              <>
+                <option value="BBA in Finance">BBA in Finance</option>
+                <option value="BBA in Marketing">BBA in Marketing</option>
+                <option value="BBA in Human Resources">BBA in Human Resources</option>
+                <option value="B.Com">B.Com</option>
+              </>
+            )}
+            {formData.department === 'law' && (
+              <>
+                <option value="LLB in Criminal Law">LLB in Criminal Law</option>
+                <option value="LLB in Corporate Law">LLB in Corporate Law</option>
+                <option value="LLB in Civil Law">LLB in Civil Law</option>
+                <option value="BA LLB">BA LLB</option>
+              </>
+            )}
+            {formData.department === 'liberal' && (
+              <>
+                <option value="BA in English">BA in English</option>
+                <option value="BA in History">BA in History</option>
+                <option value="BA in Sociology">BA in Sociology</option>
+                <option value="BA in Psychology">BA in Psychology</option>
+              </>
+            )}
+            {(!formData.department || !['engineering', 'management', 'law', 'liberal'].includes(formData.department)) && (
+              <option value="Other">Other</option>
+            )}
+            <option value="Other">Other</option>
+          </select>
+          {formData.bachelorDegreeName === 'Other' && (
+            <input
+              type="text"
+              placeholder="Enter your degree name"
+              value={formData.bachelorDegreeNameOther || ''}
+              onChange={(e) => setFormData({ ...formData, bachelorDegreeNameOther: e.target.value })}
+              style={{ marginTop: '8px' }}
+            />
+          )}
+          {errors.bachelorDegreeName && <span className="error">{errors.bachelorDegreeName}</span>}
+        </div>
+        <div className="form-field" style={{display: 'none'}}>
           <input
             type="text"
             id="bachelorDegreeName"
@@ -622,6 +677,8 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
             id="bachelorYear"
             name="bachelorYear"
             value={formData.bachelorYear || ''}
+            min="1950"
+            max="2025"
             onChange={handleInputChange}
           />
           {errors.bachelorYear && <span className="error">{errors.bachelorYear}</span>}
@@ -690,13 +747,55 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
         </div>
         <div className="form-field">
           <label htmlFor="masterDegreeName">Degree Name*</label>
-          <input
-            type="text"
+          <select
             id="masterDegreeName"
             name="masterDegreeName"
             value={formData.masterDegreeName || ''}
             onChange={handleInputChange}
-          />
+          >
+            <option value="">Select Degree</option>
+            {formData.department === 'engineering' && (
+              <>
+                <option value="M.Tech in Computer Science">M.Tech in Computer Science</option>
+                <option value="M.Tech in Mechanical Engineering">M.Tech in Mechanical Engineering</option>
+                <option value="M.Tech in Electronics & Communication">M.Tech in Electronics & Communication</option>
+                <option value="ME in Computer Science">ME in Computer Science</option>
+              </>
+            )}
+            {formData.department === 'management' && (
+              <>
+                <option value="MBA in Finance">MBA in Finance</option>
+                <option value="MBA in Marketing">MBA in Marketing</option>
+                <option value="MBA in Human Resources">MBA in Human Resources</option>
+                <option value="M.Com">M.Com</option>
+              </>
+            )}
+            {formData.department === 'law' && (
+              <>
+                <option value="LLM in Criminal Law">LLM in Criminal Law</option>
+                <option value="LLM in Corporate Law">LLM in Corporate Law</option>
+                <option value="LLM in Civil Law">LLM in Civil Law</option>
+              </>
+            )}
+            {formData.department === 'liberal' && (
+              <>
+                <option value="MA in English">MA in English</option>
+                <option value="MA in History">MA in History</option>
+                <option value="MA in Sociology">MA in Sociology</option>
+                <option value="MA in Psychology">MA in Psychology</option>
+              </>
+            )}
+            <option value="Other">Other</option>
+          </select>
+          {formData.masterDegreeName === 'Other' && (
+            <input
+              type="text"
+              placeholder="Enter your degree name"
+              value={formData.masterDegreeNameOther || ''}
+              onChange={(e) => setFormData({ ...formData, masterDegreeNameOther: e.target.value })}
+              style={{ marginTop: '8px' }}
+            />
+          )}
           {errors.masterDegreeName && <span className="error">{errors.masterDegreeName}</span>}
         </div>
         <div className="form-field">
@@ -706,6 +805,8 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
             id="masterYear"
             name="masterYear"
             value={formData.masterYear || ''}
+            min="1950"
+            max="2025"
             onChange={handleInputChange}
           />
           {errors.masterYear && <span className="error">{errors.masterYear}</span>}
