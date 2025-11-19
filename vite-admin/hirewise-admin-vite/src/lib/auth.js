@@ -1,14 +1,14 @@
 import { supabase } from '../../lib/supabase-client';
 import { API_BASE } from './config';
 
-// Register a new user
-export async function registerUser({ name, email, phone, password }) {
-  console.log('Calling registration API:', `${API_BASE}/api/auth/register`);
+// Register a new user with retry logic
+export async function registerUser({ name, email, phone, password }, retryCount = 0) {
+  const MAX_RETRIES = 2;
+  const TIMEOUT = 60000; // 60 seconds
   
   try {
-    // Add 45 second timeout for registration (Render free tier needs time to wake up)
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 45000);
+    const timeoutId = setTimeout(() => controller.abort(), TIMEOUT);
     
     const res = await fetch(`${API_BASE}/api/auth/register`, {
       method: 'POST',
@@ -27,8 +27,14 @@ export async function registerUser({ name, email, phone, password }) {
     const data = await res.json();
     return data.user;
   } catch (err) {
+    // Retry on network errors or timeouts
+    if ((err.name === 'AbortError' || err.message.includes('fetch')) && retryCount < MAX_RETRIES) {
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s before retry
+      return registerUser({ name, email, phone, password }, retryCount + 1);
+    }
+    
     if (err.name === 'AbortError') {
-      throw new Error('Server is still waking up (takes 30-45 seconds on first use). Please wait and try again.');
+      throw new Error('Connection timeout. Please check your internet and try again.');
     }
     throw err;
   }

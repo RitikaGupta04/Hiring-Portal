@@ -163,12 +163,14 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
       const errorMessage = err.message || 'Registration failed';
       
       // Show user-friendly messages for common errors
-      if (errorMessage.includes('waking up') || errorMessage.includes('sleeping') || errorMessage.includes('taking too long')) {
-        setGeneralFormError('⏳ Server is still starting. Please wait 1 minute and click APPLY NOW again.');
+      if (errorMessage.includes('timeout') || errorMessage.includes('fetch')) {
+        setGeneralFormError('Connection issue. Please check your internet and try again.');
       } else if (errorMessage.includes('422')) {
-        setGeneralFormError('Server validation error. Please check all fields are filled correctly.');
-      } else if (errorMessage.includes('already registered') || errorMessage.includes('already exists')) {
+        setGeneralFormError('Please check all fields are filled correctly.');
+      } else if (errorMessage.includes('already registered') || errorMessage.includes('already exists') || errorMessage.includes('already in use')) {
         setGeneralFormError('This email is already registered. Please login instead.');
+      } else if (errorMessage.includes('rate limit') || errorMessage.includes('too many')) {
+        setGeneralFormError('Too many attempts. Please wait a minute and try again.');
       } else {
         setGeneralFormError(errorMessage);
       }

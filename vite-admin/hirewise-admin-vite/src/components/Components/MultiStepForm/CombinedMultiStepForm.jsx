@@ -1990,33 +1990,31 @@ const CombinedMultiStepForm = () => {
   }
 
   try {
-    // Show a loading message to the user
-    console.log('Submitting application to:', API_BASE + '/api/applications');
-    
-    // No timeout - let the request complete naturally
+    // No artificial timeout - let browser handle it naturally (5 min default)
     const response = await fetch(API_BASE + '/api/applications', {
       method: 'POST',
-      body: fd
+      body: fd,
+      // Add keepalive to prevent request cancellation on page navigation
+      keepalive: true
     });
-    
-    console.log('Response status:', response.status);
 
     if (!response.ok) {
       let errorRes;
       try {
         errorRes = await response.json();
       } catch (jsonErr) {
-        // If response isn't JSON, create a generic error
         errorRes = { error: `Server returned ${response.status}: ${response.statusText}` };
       }
       
-      console.error('Server error:', errorRes);
-      
       // Check for duplicate submission
       if (response.status === 409) {
-        alert('⚠️ You have already submitted an application for this position.\n\nPlease wait or contact support if you believe this is a mistake.');
+        alert('⚠️ You have already submitted an application for this position.\n\nPlease contact support if you believe this is a mistake.');
       } else if (response.status === 404) {
-        alert('❌ Server endpoint not found. Please check if the backend server is running.\n\nAPI URL: ' + API_BASE + '/api/applications');
+        alert('❌ API endpoint not found. Please contact support.\n\nError: Server configuration issue');
+      } else if (response.status === 413) {
+        alert('❌ Uploaded files are too large. Please ensure each file is under 10MB.');
+      } else if (response.status >= 500) {
+        alert('❌ Server error. Please try again in a few minutes or contact support.');
       } else {
         alert('❌ Submission failed: ' + (errorRes.error || 'Unknown error'));
       }
@@ -2040,7 +2038,15 @@ const CombinedMultiStepForm = () => {
     navigate('/register');
   } catch (err) {
     console.error('Submission error:', err);
-    alert('❌ Submission failed: ' + err.message + '\n\nPlease try again or contact support if the issue persists.');
+    
+    // Handle different error types
+    if (err.name === 'TypeError' && err.message.includes('fetch')) {
+      alert('❌ Network error. Please check your internet connection and try again.');
+    } else if (err.message.includes('timeout')) {
+      alert('⚠️ Request timed out. Your application may still be processing.\n\nPlease wait 2 minutes and check your email for confirmation before trying again.');
+    } else {
+      alert('❌ Submission failed: ' + err.message + '\n\nPlease try again or contact support if the issue persists.');
+    }
     setSubmitting(false);
   } finally {
     setSubmitting(false);

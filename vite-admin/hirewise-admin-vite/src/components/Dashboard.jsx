@@ -509,7 +509,7 @@ const getPositionFilterOptions = () => {
                       </div>
                     </div>
                   </th>
-                  <th className="text-left py-2 px-2 text-sm font-medium text-gray-700">
+                  <th className="text-left py-2 px-2 text-xl font-medium text-gray-700">
                     <div className="flex items-center gap-2">
                       <span>{rankingMetric} (out of 10)</span>
                       {/* Ranking Metric Dropdown (NIRF/QS) */}
