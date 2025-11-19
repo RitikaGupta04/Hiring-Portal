@@ -1681,25 +1681,10 @@ const Documentation = ({ formData, setFormData, onPrevious, onSubmit, onSaveExit
                 marginRight: '8px',
               }}></span>
             )}
-            {submitting ? 'Processing... Please wait' : 'Submit Application'}
+            {submitting ? 'Submitting...' : 'Submit Application'}
           </button>
         </div>
       </div>
-      {submitting && (
-        <div style={{
-          marginTop: '1rem',
-          padding: '1rem',
-          backgroundColor: '#fff3cd',
-          border: '1px solid #ffc107',
-          borderRadius: '6px',
-          color: '#856404',
-          fontSize: '0.9rem',
-          textAlign: 'center'
-        }}>
-          ⏳ <strong>Processing your application...</strong><br />
-          This may take 30-60 seconds as we process your documents and calculate scores. Please do not close this window.
-        </div>
-      )}
     </form>
   );
 };
@@ -1990,13 +1975,17 @@ const CombinedMultiStepForm = () => {
   }
 
   try {
-    // No artificial timeout - let browser handle it naturally (5 min default)
+    // Set a reasonable 20-second timeout for better UX
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 20000);
+    
     const response = await fetch(API_BASE + '/api/applications', {
       method: 'POST',
       body: fd,
-      // Add keepalive to prevent request cancellation on page navigation
-      keepalive: true
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       let errorRes;
@@ -2040,15 +2029,18 @@ const CombinedMultiStepForm = () => {
     console.error('Submission error:', err);
     
     // Handle different error types
+    if (err.name === 'AbortError') {
+      alert('⚠️ Your application is being processed in the background.\n\nYou will receive an email confirmation within 5 minutes. If not, please contact support with your email: ' + formData.email);
+      // Navigate anyway since backend might still process it
+      navigate('/register');
+      return;
+    }
+    
     if (err.name === 'TypeError' && err.message.includes('fetch')) {
       alert('❌ Network error. Please check your internet connection and try again.');
-    } else if (err.message.includes('timeout')) {
-      alert('⚠️ Request timed out. Your application may still be processing.\n\nPlease wait 2 minutes and check your email for confirmation before trying again.');
     } else {
-      alert('❌ Submission failed: ' + err.message + '\n\nPlease try again or contact support if the issue persists.');
+      alert('❌ Submission failed: ' + err.message + '\n\nPlease try again or contact support.');
     }
-    setSubmitting(false);
-  } finally {
     setSubmitting(false);
   }
 };

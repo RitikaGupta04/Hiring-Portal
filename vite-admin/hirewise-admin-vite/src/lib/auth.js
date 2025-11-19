@@ -3,8 +3,8 @@ import { API_BASE } from './config';
 
 // Register a new user with retry logic
 export async function registerUser({ name, email, phone, password }, retryCount = 0) {
-  const MAX_RETRIES = 2;
-  const TIMEOUT = 60000; // 60 seconds
+  const MAX_RETRIES = 1; // Reduce retries for faster feedback
+  const TIMEOUT = 20000; // 20 seconds for faster response
   
   try {
     const controller = new AbortController();
