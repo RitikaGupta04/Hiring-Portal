@@ -4,26 +4,34 @@ import { API_BASE } from './config';
 // Register a new user
 export async function registerUser({ name, email, phone, password }) {
   console.log('Calling registration API:', `${API_BASE}/api/auth/register`);
-  console.log('Registration data:', { name, email, phone: phone.substring(0, 5) + '...', password: '***' });
   
-  // Use backend to create user with email already confirmed
-  const res = await fetch(`${API_BASE}/api/auth/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, email, phone, password })
-  });
-  
-  console.log('Registration API response status:', res.status);
-  
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    console.error('Registration API error:', err);
-    throw new Error(err.error || `Registration failed (HTTP ${res.status})`);
+  try {
+    // Add 15 second timeout for registration
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    
+    const res = await fetch(`${API_BASE}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, phone, password }),
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Registration failed (HTTP ${res.status})`);
+    }
+    
+    const data = await res.json();
+    return data.user;
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error('Registration is taking too long. The server may be sleeping. Please try again in a minute.');
+    }
+    throw err;
   }
-  
-  const data = await res.json();
-  console.log('Registration successful:', data);
-  return data.user;
 }
 
 // Login with email or phone and password

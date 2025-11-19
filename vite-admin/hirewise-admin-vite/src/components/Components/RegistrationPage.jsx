@@ -128,7 +128,6 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
       return;
     }
 
-    console.log('Validation passed - starting registration API call');
     setIsSubmitting(true);
     
     try {
@@ -139,27 +138,19 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
         phone: `${form.countryCode} ${form.phone}`,
         password: form.password
       });
-
-      console.log('Registration API successful:', result);
       
       // 2) Sign in on the frontend to create session
-      console.log('Signing in to create frontend session');
       const { data, error } = await supabase.auth.signInWithPassword({
         email: form.email,
         password: form.password
       });
       
       if (error) {
-        console.error('Sign in error after registration:', error);
         throw new Error('Registration succeeded but automatic login failed. Please login manually.');
       }
       
-      console.log('Sign in successful, session created:', data.session?.user?.email);
-      
       // Quick check to ensure session is active
       await new Promise(resolve => setTimeout(resolve, 100));
-      
-      console.log('Navigating to /application');
       
       // 3) Navigate to application form
       navigate('/application');
@@ -168,7 +159,9 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
       const errorMessage = err.message || 'Registration failed';
       
       // Show user-friendly messages for common errors
-      if (errorMessage.includes('422')) {
+      if (errorMessage.includes('sleeping') || errorMessage.includes('taking too long')) {
+        setGeneralFormError('⏳ Server is starting up (this happens on free hosting). Please wait 30 seconds and try again.');
+      } else if (errorMessage.includes('422')) {
         setGeneralFormError('Server validation error. Please check all fields are filled correctly.');
       } else if (errorMessage.includes('already registered') || errorMessage.includes('already exists')) {
         setGeneralFormError('This email is already registered. Please login instead.');
