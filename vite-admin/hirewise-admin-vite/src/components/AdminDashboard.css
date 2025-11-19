@@ -16,7 +16,7 @@
   text-align: center;
   flex: 1;
   margin: 0 10px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    font-size: 20pt !important;
 }
 
 .stat-card h3 {
@@ -41,7 +41,7 @@
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  flex: 1;
+    font-size: 20pt !important;
   margin: 0 10px;
 }
 
@@ -105,12 +105,12 @@ th {
   padding: 8px 12px;
   border-radius: 4px;
   cursor: pointer;
-}
+    font-size: 20pt !important;
 
 .view-btn:hover {
   background: #45a049;
 }
-
+    font-size: 20pt !important;
 .notification-list {
   margin-top: 15px;
 }
@@ -148,7 +148,7 @@ th {
   display: flex;
   align-items: center;
   gap: 10px;
-}
+    font-size: 20pt !important;
 
 .document-toggles {
   display: flex;
