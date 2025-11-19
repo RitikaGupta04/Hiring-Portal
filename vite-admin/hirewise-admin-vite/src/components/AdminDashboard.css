@@ -193,3 +193,10 @@ th {
   font-size: 20pt !important;
   font-family: Arial, sans-serif !important;
 }
+
+/* Ensure table header text (and any child elements) use the same 20pt sizing */
+.admin-dashboard thead th,
+.admin-dashboard thead th * {
+  font-size: 20pt !important;
+  font-family: Arial, sans-serif !important;
+}
