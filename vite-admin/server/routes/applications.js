@@ -212,6 +212,30 @@ router.get('/:id', async (req, res) => {
     const uniLower = (app.university || '').toLowerCase();
     const { nirf10, qs10 } = scoringService.getUniversityRankingScores(uniLower);
 
+    // Calculate total experience from teaching and research experiences
+    let totalExperience = 0;
+    if (teachingExp && teachingExp.length > 0) {
+      teachingExp.forEach(exp => {
+        if (exp.start_date) {
+          const start = new Date(exp.start_date);
+          const end = exp.end_date ? new Date(exp.end_date) : new Date();
+          const years = (end - start) / (1000 * 60 * 60 * 24 * 365.25);
+          totalExperience += years;
+        }
+      });
+    }
+    if (researchExp && researchExp.length > 0) {
+      researchExp.forEach(exp => {
+        if (exp.start_date) {
+          const start = new Date(exp.start_date);
+          const end = exp.end_date ? new Date(exp.end_date) : new Date();
+          const years = (end - start) / (1000 * 60 * 60 * 24 * 365.25);
+          totalExperience += years;
+        }
+      });
+    }
+    const totalExpYears = totalExperience > 0 ? `${Math.floor(totalExperience)} years ${Math.round((totalExperience % 1) * 12)} months` : app.total_experience || 'N/A';
+
     // Combine all data
     const fullData = {
       ...app,
@@ -223,7 +247,8 @@ router.get('/:id', async (req, res) => {
       nirf10,
       qs10,
       scopus_id: researchInfo?.scopus_id,
-      orchid_id: researchInfo?.orchid_id
+      orchid_id: researchInfo?.orchid_id,
+      total_experience: totalExpYears
     };
 
     res.json(fullData);

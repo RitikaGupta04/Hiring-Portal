@@ -800,26 +800,40 @@ const getPositionFilterOptions = () => {
                       <div className="bg-white border rounded-lg p-4 shadow-sm">
                         <h3 className="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Experience</h3>
                         <div className="space-y-3">
-                          <div>
-                            <p className="text-xs font-semibold text-gray-500 uppercase">Total Experience</p>
-                            <p className="text-sm text-gray-900">{selectedCandidate.experience || selectedCandidate.total_experience || 'N/A'}</p>
+                          <div className="bg-blue-50 rounded p-3">
+                            <p className="text-xs font-semibold text-blue-600 uppercase">Total Experience</p>
+                            <p className="text-lg font-bold text-gray-900">{selectedCandidate.total_experience || selectedCandidate.experience || 'N/A'}</p>
                           </div>
-                          {selectedCandidate.teachingPost && (
+                          
+                          {/* Teaching Experiences */}
+                          {selectedCandidate.teachingExperiences && selectedCandidate.teachingExperiences.length > 0 && (
                             <div>
-                              <p className="text-xs font-semibold text-gray-500 uppercase">Current/Recent Position</p>
-                              <p className="text-sm text-gray-900">{selectedCandidate.teachingPost}</p>
+                              <p className="text-xs font-bold text-gray-700 uppercase mb-2">Teaching Experience</p>
+                              {selectedCandidate.teachingExperiences.slice(0, 3).map((exp, idx) => (
+                                <div key={idx} className="border-l-4 border-blue-500 pl-3 mb-2">
+                                  <p className="text-sm font-medium text-gray-900">{exp.post || 'N/A'}</p>
+                                  <p className="text-xs text-gray-600">{exp.institution || 'N/A'}</p>
+                                  <p className="text-xs text-gray-500">
+                                    {exp.start_date ? new Date(exp.start_date).getFullYear() : 'N/A'} - {exp.end_date ? new Date(exp.end_date).getFullYear() : 'Present'}
+                                  </p>
+                                </div>
+                              ))}
                             </div>
                           )}
-                          {selectedCandidate.teaching_experience && (
+                          
+                          {/* Research Experiences */}
+                          {selectedCandidate.researchExperiences && selectedCandidate.researchExperiences.length > 0 && (
                             <div>
-                              <p className="text-xs font-semibold text-gray-500 uppercase">Teaching Experience</p>
-                              <p className="text-sm text-gray-900">{selectedCandidate.teaching_experience}</p>
-                            </div>
-                          )}
-                          {selectedCandidate.research_experience && (
-                            <div>
-                              <p className="text-xs font-semibold text-gray-500 uppercase">Research Experience</p>
-                              <p className="text-sm text-gray-900">{selectedCandidate.research_experience}</p>
+                              <p className="text-xs font-bold text-gray-700 uppercase mb-2">Research Experience</p>
+                              {selectedCandidate.researchExperiences.slice(0, 3).map((exp, idx) => (
+                                <div key={idx} className="border-l-4 border-green-500 pl-3 mb-2">
+                                  <p className="text-sm font-medium text-gray-900">{exp.post || 'Researcher'}</p>
+                                  <p className="text-xs text-gray-600">{exp.institution || 'N/A'}</p>
+                                  <p className="text-xs text-gray-500">
+                                    {exp.start_date ? new Date(exp.start_date).getFullYear() : 'N/A'} - {exp.end_date ? new Date(exp.end_date).getFullYear() : 'Present'}
+                                  </p>
+                                </div>
+                              ))}
                             </div>
                           )}
                         </div>
@@ -1017,33 +1031,58 @@ const getPositionFilterOptions = () => {
                         </ResponsiveContainer>
                       </div>
 
-                      {/* Comparison Chart - New Addition */}
+                      {/* Performance Overview - Horizontal Bars */}
                       <div className="bg-white border rounded-lg p-4 shadow-sm">
-                        <h3 className="text-sm font-bold text-gray-900 mb-2">Performance Overview</h3>
-                        <ResponsiveContainer width="100%" height={180}>
-                          <BarChart
-                            data={[
-                              { metric: 'QS', score: selectedCandidate.qs10 || 0, fill: '#3b82f6' },
-                              { metric: 'NIRF', score: selectedCandidate.nirf10 || 0, fill: '#f97316' },
-                              { metric: 'Research', score: selectedCandidate.researchScore10 || 0, fill: '#10b981' }
-                            ]}
-                            layout="horizontal"
-                          >
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis type="number" domain={[0, 10]} tick={{ fontSize: 12 }} />
-                            <YAxis dataKey="metric" type="category" tick={{ fontSize: 12 }} />
-                            <Tooltip />
-                            <Bar dataKey="score" radius={[0, 8, 8, 0]}>
-                              {[
-                                { metric: 'QS', score: selectedCandidate.qs10 || 0, fill: '#3b82f6' },
-                                { metric: 'NIRF', score: selectedCandidate.nirf10 || 0, fill: '#f97316' },
-                                { metric: 'Research', score: selectedCandidate.researchScore10 || 0, fill: '#10b981' }
-                              ].map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.fill} />
-                              ))}
-                            </Bar>
-                          </BarChart>
-                        </ResponsiveContainer>
+                        <h3 className="text-sm font-bold text-gray-900 mb-3">Performance Overview</h3>
+                        <div className="space-y-3">
+                          {/* QS Bar */}
+                          <div>
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-xs font-semibold text-blue-600">QS Ranking</span>
+                              <span className="text-sm font-bold text-blue-700">{selectedCandidate.qs10 || 0}/10</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-6 overflow-hidden">
+                              <div 
+                                className="bg-gradient-to-r from-blue-400 to-blue-600 h-full rounded-full flex items-center justify-center text-xs font-bold text-white transition-all duration-500"
+                                style={{ width: `${((selectedCandidate.qs10 || 0) / 10) * 100}%`, minWidth: '30px' }}
+                              >
+                                {selectedCandidate.qs10 || 0}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* NIRF Bar */}
+                          <div>
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-xs font-semibold text-orange-600">NIRF Ranking</span>
+                              <span className="text-sm font-bold text-orange-700">{selectedCandidate.nirf10 || 0}/10</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-6 overflow-hidden">
+                              <div 
+                                className="bg-gradient-to-r from-orange-400 to-orange-600 h-full rounded-full flex items-center justify-center text-xs font-bold text-white transition-all duration-500"
+                                style={{ width: `${((selectedCandidate.nirf10 || 0) / 10) * 100}%`, minWidth: '30px' }}
+                              >
+                                {selectedCandidate.nirf10 || 0}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Research Bar */}
+                          <div>
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-xs font-semibold text-green-600">Research Score</span>
+                              <span className="text-sm font-bold text-green-700">{selectedCandidate.researchScore10 || 0}/10</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-6 overflow-hidden">
+                              <div 
+                                className="bg-gradient-to-r from-green-400 to-green-600 h-full rounded-full flex items-center justify-center text-xs font-bold text-white transition-all duration-500"
+                                style={{ width: `${((selectedCandidate.researchScore10 || 0) / 10) * 100}%`, minWidth: '30px' }}
+                              >
+                                {selectedCandidate.researchScore10 || 0}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
 
                       {/* University & Contact Info */}
