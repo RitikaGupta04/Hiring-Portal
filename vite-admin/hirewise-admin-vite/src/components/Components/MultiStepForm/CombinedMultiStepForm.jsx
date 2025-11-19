@@ -200,7 +200,8 @@ const PersonalInformation = ({ formData, setFormData, onNext, onPrevious, onSave
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (user) {
         // Auto-fill email from auth
         if (!formData.email) {
@@ -1680,10 +1681,25 @@ const Documentation = ({ formData, setFormData, onPrevious, onSubmit, onSaveExit
                 marginRight: '8px',
               }}></span>
             )}
-            {submitting ? 'Submitting Application…' : 'Submit Application'}
+            {submitting ? 'Processing... Please wait' : 'Submit Application'}
           </button>
         </div>
       </div>
+      {submitting && (
+        <div style={{
+          marginTop: '1rem',
+          padding: '1rem',
+          backgroundColor: '#fff3cd',
+          border: '1px solid #ffc107',
+          borderRadius: '6px',
+          color: '#856404',
+          fontSize: '0.9rem',
+          textAlign: 'center'
+        }}>
+          ⏳ <strong>Processing your application...</strong><br />
+          This may take 30-60 seconds as we process your documents and calculate scores. Please do not close this window.
+        </div>
+      )}
     </form>
   );
 };
@@ -1707,29 +1723,14 @@ const CombinedMultiStepForm = () => {
   // Load draft on component mount
   useEffect(() => {
     const loadDraft = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) {
-        console.log('❌ No user found, not loading draft');
         return;
       }
 
-      console.log('👤 Loading data for user:', user.id, user.email);
-
       try {
-        // First check if user has already submitted an application
-        const { data: existingApp } = await supabase
-          .from('applications')
-          .select('id')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        // If application exists, don't load draft
-        if (existingApp) {
-          console.log('✅ Application already submitted, not loading draft');
-          return;
-        }
-
-        // Load draft only if no application exists
+        // Load draft directly without checking existing application
         const { data, error } = await supabase
           .from('draft_applications')
           .select('form_data, current_step')
@@ -1742,12 +1743,8 @@ const CombinedMultiStepForm = () => {
         }
 
         if (data && data.form_data) {
-          console.log('📋 Loading draft for user:', user.id);
-          console.log('Draft data firstName:', data.form_data.firstName);
           setFormData(data.form_data);
           setCurrentStep(data.current_step);
-        } else {
-          console.log('✨ No draft found - fresh form for user:', user.id, user.email);
         }
       } catch (err) {
         console.log('❌ Error in loadDraft:', err.message);
@@ -1840,9 +1837,10 @@ const CombinedMultiStepForm = () => {
 
   // Save draft function
   const saveDraftAndExit = async () => {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
     
-    if (authError || !user) {
+    if (!user) {
       alert('You must be logged in to save progress.');
       return;
     }
@@ -1850,7 +1848,7 @@ const CombinedMultiStepForm = () => {
     try {
       const draftData = {
         user_id: user.id,
-       form_data: formData,
+        form_data: formData,
         current_step: currentStep,
         updated_at: new Date().toISOString()
       };
@@ -1870,56 +1868,26 @@ const CombinedMultiStepForm = () => {
   };
 
  const onSubmitFinalApplication = async () => {
-  console.log('🚀 onSubmitFinalApplication called!');
-  
   // Client-side double-submit guard: prevents multiple rapid clicks
   if (submitting) {
-    console.log('⚠️ Already submitting, ignoring duplicate click');
     return;
   }
   
-  console.log('✅ Setting submitting state to true');
   setSubmitting(true);
   
-  console.log('🔐 Getting authenticated user...');
-  let user, authError;
-  try {
-    // Use getSession instead of getUser for faster response
-    const { data: { session }, error } = await supabase.auth.getSession();
-    if (error) {
-      authError = error;
-      console.error('🔑 Session error:', error);
-    } else if (!session) {
-      authError = new Error('No active session');
-      console.error('❌ No session found');
-    } else {
-      user = session.user;
-      console.log('👤 User from session:', user?.id ? `Found (${user.id})` : 'Not found');
-    }
-  } catch (err) {
-    console.error('❌ Auth call failed:', err);
-    authError = err;
-  }
+  const { data: { session } } = await supabase.auth.getSession();
+  const user = session?.user;
   
-  if (authError || !user) {
-    console.error('❌ User not authenticated:', authError);
+  if (!user) {
     alert('❌ You must be logged in to submit an application.');
     setSubmitting(false);
     return;
   }
-  
-  console.log('📝 Starting form data normalization...');
   // Normalize any 'Other' institute choices defensively before deriving values
   const normalized = { ...formData };
   
   // Validate required fields before submission
   if (!normalized.firstName || !normalized.email || !normalized.position || !normalized.department) {
-    console.error('❌ Missing required fields:', {
-      firstName: normalized.firstName || 'MISSING',
-      email: normalized.email || 'MISSING',
-      position: normalized.position || 'MISSING',
-      department: normalized.department || 'MISSING'
-    });
     alert('❌ Please fill in all required fields:\n\n' + 
       (!normalized.firstName ? '• First Name\n' : '') +
       (!normalized.email ? '• Email\n' : '') +
@@ -1956,18 +1924,6 @@ const CombinedMultiStepForm = () => {
     derivedUniversity = normalized.bachelorInstitute || '';
     derivedGradYear = normalized.bachelorYear || '';
   }
-
-  console.log('📋 Building FormData...');
-  console.log('Form data summary:', {
-    position: normalized.position,
-    department: normalized.department,
-    firstName: normalized.firstName,
-    lastName: normalized.lastName,
-    email: normalized.email,
-    user_id: user?.id,
-    derivedHighestDegree,
-    derivedUniversity
-  });
 
   // Build multipart/form-data so files are actually uploaded via multer on the server
   const fd = new FormData();
@@ -2034,68 +1990,58 @@ const CombinedMultiStepForm = () => {
   }
 
   try {
-    // Debug: Log what we're sending
-    console.log('📤 Sending application data:');
-    console.log('- position:', normalized.position);
-    console.log('- department:', normalized.department);
-    console.log('- firstName:', normalized.firstName);
-    console.log('- lastName:', normalized.lastName);
-    console.log('- email:', normalized.email);
-    console.log('- user_id:', user?.id);
-    console.log('- API endpoint:', API_BASE + '/api/applications');
+    // Show a loading message to the user
+    console.log('Submitting application to:', API_BASE + '/api/applications');
     
-    // Log actual FormData contents
-    console.log('📦 FormData contents:');
-    for (let pair of fd.entries()) {
-      if (pair[1] instanceof File) {
-        console.log(`  ${pair[0]}: [File: ${pair[1].name}]`);
-      } else {
-        console.log(`  ${pair[0]}: ${pair[1]}`);
-      }
-    }
-    
-    // Show warning about Render cold start
-    console.log('⏳ Submitting to backend...');
-    
-    // Add timeout of 30 seconds
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000);
-    
-    console.log('🌐 Making fetch request...');
+    // No timeout - let the request complete naturally
     const response = await fetch(API_BASE + '/api/applications', {
       method: 'POST',
-      body: fd,
-      signal: controller.signal
+      body: fd
     });
     
-    clearTimeout(timeoutId);
-    console.log('📥 Response received:', response.status, response.statusText);
+    console.log('Response status:', response.status);
 
     if (!response.ok) {
-      const errorRes = await response.json();
-      console.error('❌ Server error response:', errorRes);
+      let errorRes;
+      try {
+        errorRes = await response.json();
+      } catch (jsonErr) {
+        // If response isn't JSON, create a generic error
+        errorRes = { error: `Server returned ${response.status}: ${response.statusText}` };
+      }
+      
+      console.error('Server error:', errorRes);
       
       // Check for duplicate submission
       if (response.status === 409) {
         alert('⚠️ You have already submitted an application for this position.\n\nPlease wait or contact support if you believe this is a mistake.');
+      } else if (response.status === 404) {
+        alert('❌ Server endpoint not found. Please check if the backend server is running.\n\nAPI URL: ' + API_BASE + '/api/applications');
       } else {
         alert('❌ Submission failed: ' + (errorRes.error || 'Unknown error'));
       }
-      throw new Error(errorRes.error || 'Failed to submit');
+      setSubmitting(false);
+      return;
     }
 
     const result = await response.json();
-    console.log('✅ Submission successful:', result);
-    alert('✅ Application submitted successfully!\n\n' + (result.message || 'Your application is being processed. You will receive confirmation via email.'));
+    alert('✅ Application submitted successfully!\n\nYour application is being processed. You will receive confirmation via email.');
     
-    // Navigate to thank you page immediately
+    // Delete draft after successful submission
+    try {
+      await supabase
+        .from('draft_applications')
+        .delete()
+        .eq('user_id', user.id);
+    } catch (draftErr) {
+      console.log('Draft cleanup warning:', draftErr);
+    }
+    
     navigate('/register');
   } catch (err) {
-    console.error('❌ Submission error:', err);
-    // Only show alert if we haven't already shown one above
-    if (!err.message.includes('Failed to submit')) {
-      alert('❌ Submission failed: ' + err.message);
-    }
+    console.error('Submission error:', err);
+    alert('❌ Submission failed: ' + err.message + '\n\nPlease try again or contact support if the issue persists.');
+    setSubmitting(false);
   } finally {
     setSubmitting(false);
   }
