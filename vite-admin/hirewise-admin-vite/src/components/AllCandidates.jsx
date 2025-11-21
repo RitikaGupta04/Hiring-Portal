@@ -49,20 +49,35 @@ const AllCandidates = () => {
 
   const handleViewDetails = (candidate) => {
     console.log('Candidate data:', candidate); // Debug: check what fields exist
+    console.log('Research fields check:', {
+      scopus_general_papers: candidate.scopus_general_papers,
+      conference_papers: candidate.conference_papers,
+      edited_books: candidate.edited_books,
+      researchInfo: candidate.researchInfo,
+      research_info: candidate.research_info
+    });
     
-    // If research data is in a JSON column, parse it and flatten it
-    if (candidate.researchInfo && typeof candidate.researchInfo === 'string') {
-      try {
-        const parsed = JSON.parse(candidate.researchInfo);
-        candidate = { ...candidate, ...parsed };
-      } catch (e) {
-        console.error('Failed to parse researchInfo:', e);
-      }
-    } else if (candidate.researchInfo && typeof candidate.researchInfo === 'object') {
-      candidate = { ...candidate, ...candidate.researchInfo };
+    // Try multiple possible field names for research data
+    let enriched = { ...candidate };
+    
+    // Check if data is in researchInfo JSON column
+    if (candidate.researchInfo) {
+      const info = typeof candidate.researchInfo === 'string' 
+        ? JSON.parse(candidate.researchInfo) 
+        : candidate.researchInfo;
+      enriched = { ...enriched, ...info };
     }
     
-    setSelectedCandidate(candidate);
+    // Check if data is in research_info JSON column (snake_case)
+    if (candidate.research_info) {
+      const info = typeof candidate.research_info === 'string' 
+        ? JSON.parse(candidate.research_info) 
+        : candidate.research_info;
+      enriched = { ...enriched, ...info };
+    }
+    
+    console.log('Enriched candidate:', enriched);
+    setSelectedCandidate(enriched);
   };
 
   const closeModal = () => {
