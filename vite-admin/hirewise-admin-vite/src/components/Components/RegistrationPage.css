@@ -247,6 +247,11 @@ body {
   transition: border 0.3s, background 0.3s, box-shadow 0.3s;
   font-weight: 500;
 }
+.figma-input::placeholder {
+  color: #6b7280;
+  font-size: 0.95rem;
+  opacity: 1;
+}
 .figma-input:focus {
   border-color: var(--accent); /* Vibrant blue on focus */
   background: #fff;
