@@ -1457,9 +1457,15 @@ const ResearchInformation = ({ formData, setFormData, onNext, onPrevious, onSave
         newErrors.orchidId = 'ORCID ID must be in the format 0000-0001-5109-3700';
       }
     }
-    if (formData.scopus_general_papers === '') newErrors.scopus_general_papers = 'No. of Scopus Index General Papers is required';
-    if (formData.conference_papers === '') newErrors.conference_papers = 'No. of Scopus Index Conference Papers is required';
-    if (formData.edited_books === '') newErrors.edited_books = 'No. of Edited Books is required';
+    if (!formData.scopus_general_papers && formData.scopus_general_papers !== 0) {
+      newErrors.scopus_general_papers = 'No. of Scopus Index General Papers is required';
+    }
+    if (!formData.conference_papers && formData.conference_papers !== 0) {
+      newErrors.conference_papers = 'No. of Scopus Index Conference Papers is required';
+    }
+    if (!formData.edited_books && formData.edited_books !== 0) {
+      newErrors.edited_books = 'No. of Edited Books is required';
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
