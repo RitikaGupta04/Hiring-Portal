@@ -248,10 +248,10 @@ body {
   font-weight: 500;
 }
 .figma-input::placeholder {
-  color: #007bff;
+  color: #007bff !important;
   font-size: 1rem;
-  font-weight: 500;
-  opacity: 1;
+  font-weight: 600;
+  opacity: 1 !important;
 }
 .figma-input:focus {
   border-color: var(--accent); /* Vibrant blue on focus */
