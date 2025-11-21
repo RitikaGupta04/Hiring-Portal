@@ -21,9 +21,11 @@ const AllCandidates = () => {
       setLoading(true);
       
       // Direct Supabase query to get ALL fields including research data
+      // Exclude rejected applications from the list
       let query = supabase
         .from('faculty_applications')
         .select('*')
+        .neq('status', 'rejected')
         .order('created_at', { ascending: false });
       
       if (selectedDepartment !== 'All') {
