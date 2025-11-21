@@ -282,14 +282,22 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
                     autoComplete="off" 
                     placeholder="Email Address"
                     style={{ 
-                      fontSize: '1rem', 
+                      fontSize: '1.1rem', 
                       padding: '14px 16px',
                       border: '2px solid #9ca3af',
                       borderRadius: '12px',
-                      backgroundColor: '#ffffff'
+                      backgroundColor: '#ffffff',
+                      color: '#1a2c47'
                     }}
                   />
                 </div>
+                <style dangerouslySetInnerHTML={{__html: `
+                  #loginUsername::placeholder {
+                    color: #007bff !important;
+                    font-weight: 600 !important;
+                    opacity: 1 !important;
+                  }
+                `}} />
 
                 <div className="figma-form-group">
                   <input 
@@ -303,14 +311,22 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
                     autoComplete="off" 
                     placeholder="Password"
                     style={{ 
-                      fontSize: '1rem', 
+                      fontSize: '1.1rem', 
                       padding: '14px 16px',
                       border: '2px solid #9ca3af',
                       borderRadius: '12px',
-                      backgroundColor: '#ffffff'
+                      backgroundColor: '#ffffff',
+                      color: '#1a2c47'
                     }}
                   />
                 </div>
+                <style dangerouslySetInnerHTML={{__html: `
+                  #loginPassword::placeholder {
+                    color: #007bff !important;
+                    font-weight: 600 !important;
+                    opacity: 1 !important;
+                  }
+                `}} />
                 {loginError && <div className="figma-error">{loginError}</div>}
                 <button 
                   className="figma-apply-btn" 
