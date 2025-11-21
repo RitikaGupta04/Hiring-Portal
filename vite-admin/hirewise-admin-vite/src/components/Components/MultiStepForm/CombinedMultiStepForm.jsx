@@ -520,8 +520,8 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
       const currentYear = new Date().getFullYear();
       if (masterYear < 1950 || masterYear > currentYear) {
         newErrors.masterYear = `Year must be between 1950 and ${currentYear}`;
-      } else if (bachelorYear && masterYear < bachelorYear) {
-        newErrors.masterYear = 'Master year cannot be before Bachelor year';
+      } else if (bachelorYear && masterYear <= bachelorYear) {
+        newErrors.masterYear = 'Master year must be after Bachelor year';
       }
     }
     if (!formData.masterCgpa) {
