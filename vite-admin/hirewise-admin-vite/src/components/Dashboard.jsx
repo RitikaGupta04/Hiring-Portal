@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Users, Eye, CheckCircle, XCircle, User, Building, ChevronDown, Filter, X } from 'lucide-react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import Charts from './charts'; // Adjust path as needed
-import { API_BASE } from '../lib/config';
+import { candidatesApi } from '../lib/api';
 
 
 
@@ -67,12 +67,8 @@ const Dashboard = () => {
     const fetchCandidates = async () => {
       try {
         setLoading(true);
-  // Fetch a generous limit and let the UI show exactly what's available after filters
-  const response = await fetch(`${API_BASE}/api/applications/rankings/top?limit=100`);
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-        const data = await response.json();
+        // ⚡ OPTIMIZED: Use API client with retry & caching
+        const data = await candidatesApi.getTopRankings();
         const arr = Array.isArray(data) ? data : [];
         const unique = dedupeCandidates(arr);
         setCandidates(unique);
@@ -248,18 +244,13 @@ const getPositionFilterOptions = () => {
     
     // Fetch complete application details including education, experience, etc.
     try {
-      const response = await fetch(`${API_BASE}/api/applications/${candidate.id}`);
-      if (response.ok) {
-        const fullData = await response.json();
-        setSelectedCandidate({ 
-          ...candidate, 
-          ...fullData,
-          listRank: candidate.listRank,
-          loading: false 
-        });
-      } else {
-        setSelectedCandidate({ ...candidate, loading: false });
-      }
+      const fullData = await candidatesApi.getById(candidate.id);
+      setSelectedCandidate({ 
+        ...candidate, 
+        ...fullData,
+        listRank: candidate.listRank,
+        loading: false 
+      });
     } catch (error) {
       console.error('Error fetching candidate details:', error);
       setSelectedCandidate({ ...candidate, loading: false });

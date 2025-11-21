@@ -6,6 +6,7 @@ import path from 'path';
 import { createClient } from '@supabase/supabase-js';
 import documentService from '../services/documentService.js';
 import scoringService from '../services/scoringService.js';
+import cache from '../config/cache.js';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -44,11 +45,11 @@ const uploadToStorage = async (bucket, fileName, fileBuffer) => {
 
 const router = express.Router();
 
-// Get top ranked applications
-router.get('/rankings/top', async (req, res) => {
+// ⚡ OPTIMIZED: Get top ranked applications with caching
+router.get('/rankings/top', cache.middleware(180), async (req, res) => {
   try {
     const { department = null, position = null, limit = '10' } = req.query;
-    const parsedLimit = Math.min(parseInt(limit) || 10, 50);
+    const parsedLimit = Math.min(parseInt(limit) || 10, 100); // Cap at 100
 
     const top = await scoringService.getTopRankedApplications(
       department && department !== 'All' ? department : null,
@@ -56,104 +57,114 @@ router.get('/rankings/top', async (req, res) => {
       parsedLimit
     );
 
-    // Enrich with NIRF/QS scores (0..10) for UI switching
-    // Enrich with async fallbacks (research/teaching institutions) when university is missing or unmatched
-    // Also fetch teaching post from teaching_experiences table
-    let enriched = await Promise.all((top || []).map(async (app) => {
-      let uniLower = (app.university || '').toLowerCase();
+    // ⚡ OPTIMIZATION: Batch fetch all related data in parallel
+    if (!top || top.length === 0) {
+      return res.json([]);
+    }
+
+    const appIds = top.map(a => a.id).filter(Boolean);
+    
+    // Fetch all teaching posts, research data, and teaching/research institutions in parallel
+    const [teachingPostsData, researchData, researchExpData, teachingExpData] = await Promise.all([
+      supabase
+        .from('teaching_experiences')
+        .select('application_id, post')
+        .in('application_id', appIds)
+        .order('start_date', { ascending: false }),
+      
+      supabase
+        .from('research_info')
+        .select('application_id, scopus_general_papers, conference_papers, scopus_id, orchid_id')
+        .in('application_id', appIds),
+      
+      supabase
+        .from('research_experiences')
+        .select('application_id, institution')
+        .in('application_id', appIds)
+        .limit(1),
+      
+      supabase
+        .from('teaching_experiences')
+        .select('application_id, institution')
+        .in('application_id', appIds)
+        .limit(1)
+    ]);
+
+    // Create lookup maps for O(1) access
+    const teachingPostMap = new Map();
+    const researchMap = new Map();
+    const researchInstMap = new Map();
+    const teachingInstMap = new Map();
+
+    (teachingPostsData.data || []).forEach(t => {
+      if (!teachingPostMap.has(t.application_id)) {
+        teachingPostMap.set(t.application_id, t.post);
+      }
+    });
+
+    (researchData.data || []).forEach(r => {
+      researchMap.set(r.application_id, {
+        total_papers: (r.scopus_general_papers || 0) + (r.conference_papers || 0),
+        scopus_papers: r.scopus_general_papers || 0,
+        conference_papers: r.conference_papers || 0,
+        scopus_id: r.scopus_id,
+        orchid_id: r.orchid_id
+      });
+    });
+
+    (researchExpData.data || []).forEach(r => {
+      researchInstMap.set(r.application_id, r.institution);
+    });
+
+    (teachingExpData.data || []).forEach(t => {
+      teachingInstMap.set(t.application_id, t.institution);
+    });
+
+    // ⚡ Enrich all applications in one pass
+    const enriched = top.map(app => {
+      const uniLower = (app.university || '').toLowerCase();
       let { nirf10, qs10 } = scoringService.getUniversityRankingScores(uniLower);
       
-      // Fetch teaching post (Professor, Associate Professor, etc.) from teaching_experiences
-      let teachingPost = null;
-      if (app.id) {
-        const { data: teachingData } = await supabase
-          .from('teaching_experiences')
-          .select('post')
-          .eq('application_id', app.id)
-          .order('start_date', { ascending: false })
-          .limit(1);
-        teachingPost = teachingData && teachingData[0]?.post;
-      }
+      const teachingPost = teachingPostMap.get(app.id);
+      const research = researchMap.get(app.id);
 
-      // Fallback to research institution
-      if ((nirf10 == null && qs10 == null) && app.id) {
-        const { data: rData } = await supabase
-          .from('research_experiences')
-          .select('institution')
-          .eq('application_id', app.id)
-          .limit(1);
-        const rInst = rData && rData[0]?.institution;
+      // Fallback to research or teaching institution if university not matched
+      if ((nirf10 == null && qs10 == null)) {
+        const rInst = researchInstMap.get(app.id);
         if (rInst) {
           const scores = scoringService.getUniversityRankingScores((rInst || '').toLowerCase());
-          nirf10 = scores.nirf10; qs10 = scores.qs10;
+          nirf10 = scores.nirf10;
+          qs10 = scores.qs10;
         }
       }
 
-      // Fallback to teaching institution
-      if ((nirf10 == null && qs10 == null) && app.id) {
-        const { data: tData } = await supabase
-          .from('teaching_experiences')
-          .select('institution')
-          .eq('application_id', app.id)
-          .limit(1);
-        const tInst = tData && tData[0]?.institution;
+      if ((nirf10 == null && qs10 == null)) {
+        const tInst = teachingInstMap.get(app.id);
         if (tInst) {
           const scores = scoringService.getUniversityRankingScores((tInst || '').toLowerCase());
-          nirf10 = scores.nirf10; qs10 = scores.qs10;
+          nirf10 = scores.nirf10;
+          qs10 = scores.qs10;
         }
       }
 
-      return { ...app, nirf10, qs10, teachingPost };
-    }));
-
-    // Attach research metrics: papers, h-index, and score
-    try {
-      const appIds = enriched.map(a => a.id).filter(Boolean);
-      if (appIds.length) {
-        const { data: researchData, error: resErr } = await supabase
-          .from('research_info')
-          .select('application_id, scopus_general_papers, conference_papers, scopus_id, orchid_id')
-          .in('application_id', appIds);
-        
-        if (!resErr && Array.isArray(researchData)) {
-          const map = new Map(researchData.map(r => [
-            r.application_id, 
-            {
-              total_papers: (r.scopus_general_papers || 0) + (r.conference_papers || 0),
-              scopus_papers: r.scopus_general_papers || 0,
-              conference_papers: r.conference_papers || 0,
-              scopus_id: r.scopus_id,
-              orchid_id: r.orchid_id
-            }
-          ]));
-          
-          // Calculate research score and metrics
-          enriched = enriched.map(a => {
-            const research = map.get(a.id);
-            let researchScore10 = null;
-            let totalPapers = 0;
-            
-            if (research) {
-              totalPapers = research.total_papers;
-              
-              // Score based on total Scopus papers: normalize to 0-10 scale
-              // 50+ papers = 10, linear scaling below that
-              const paperScore = Math.min((totalPapers / 50) * 10, 10);
-              
-              researchScore10 = Math.min(Math.round(paperScore * 10) / 10, 10);
-            }
-            
-            return { 
-              ...a, 
-              researchScore10,
-              totalPapers
-            };
-          });
-        }
+      // Calculate research score
+      let researchScore10 = null;
+      let totalPapers = 0;
+      if (research) {
+        totalPapers = research.total_papers;
+        const paperScore = Math.min((totalPapers / 50) * 10, 10);
+        researchScore10 = Math.min(Math.round(paperScore * 10) / 10, 10);
       }
-    } catch (e) {
-      console.warn('Research score enrichment warning:', e.message);
-    }
+
+      return { 
+        ...app, 
+        nirf10, 
+        qs10, 
+        teachingPost,
+        researchScore10,
+        totalPapers
+      };
+    });
 
     res.json(enriched);
   } catch (error) {
@@ -162,42 +173,27 @@ router.get('/rankings/top', async (req, res) => {
   }
 });
 
-// Get single application by ID with all details
-router.get('/:id', async (req, res) => {
+// ⚡ OPTIMIZED: Get single application by ID with all details (with caching)
+router.get('/:id', cache.middleware(300), async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Fetch application details
-    const { data: app, error: appError } = await supabase
-      .from('faculty_applications')
-      .select('*')
-      .eq('id', id)
-      .single();
+    // ⚡ Fetch all data in parallel
+    const [appResult, researchInfoResult, teachingExpResult, researchExpResult] = await Promise.all([
+      supabase.from('faculty_applications').select('*').eq('id', id).single(),
+      supabase.from('research_info').select('*').eq('application_id', id).single(),
+      supabase.from('teaching_experiences').select('*').eq('application_id', id).order('start_date', { ascending: false }),
+      supabase.from('research_experiences').select('*').eq('application_id', id).order('start_date', { ascending: false })
+    ]);
 
-    if (appError || !app) {
+    const app = appResult.data;
+    if (appResult.error || !app) {
       return res.status(404).json({ error: 'Application not found' });
     }
 
-    // Fetch research info
-    const { data: researchInfo } = await supabase
-      .from('research_info')
-      .select('*')
-      .eq('application_id', id)
-      .single();
-
-    // Fetch teaching experiences
-    const { data: teachingExp } = await supabase
-      .from('teaching_experiences')
-      .select('*')
-      .eq('application_id', id)
-      .order('start_date', { ascending: false });
-
-    // Fetch research experiences
-    const { data: researchExp } = await supabase
-      .from('research_experiences')
-      .select('*')
-      .eq('application_id', id)
-      .order('start_date', { ascending: false });
+    const researchInfo = researchInfoResult.data;
+    const teachingExp = teachingExpResult.data || [];
+    const researchExp = researchExpResult.data || [];
 
     // Calculate research metrics
     let totalPapers = 0;
@@ -470,6 +466,10 @@ router.post(
         // Don't fail the submission - scoring/reports can be regenerated later
       });
 
+      // ⚡ Invalidate relevant caches
+      await cache.delPattern('req:/api/applications/rankings/*');
+      await cache.delPattern('req:/api/applications*');
+
       // Respond immediately to user
       res.status(201).json({
         success: true,
@@ -484,5 +484,59 @@ router.post(
     }
   }
 );
+
+// ⚡ NEW OPTIMIZED ENDPOINT: Get all candidates with complete details in ONE query
+// This replaces the N+1 query problem in AllCandidates component
+router.get('/all/detailed', cache.middleware(120), async (req, res) => {
+  try {
+    const { department } = req.query;
+
+    // Build query with JOIN to fetch all related data in ONE query
+    let query = supabase
+      .from('faculty_applications')
+      .select(`
+        *,
+        teaching_experiences (*),
+        research_experiences (*),
+        research_info (*)
+      `)
+      .neq('status', 'rejected');
+
+    if (department && department !== 'All') {
+      query = query.eq('department', department);
+    }
+
+    const { data: applications, error } = await query;
+
+    if (error) throw error;
+
+    // Format the data for frontend
+    const formatted = (applications || []).map(app => ({
+      ...app,
+      teachingExperiences: app.teaching_experiences || [],
+      researchExperiences: app.research_experiences || [],
+      researchInfo: app.research_info?.[0] || {
+        scopus_general_papers: 0,
+        conference_papers: 0,
+        edited_books: 0
+      },
+      department: app.department || 'other',
+      experience: app.years_of_experience || 'Not specified',
+      publications: app.research_info?.[0]?.scopus_general_papers || 0
+    }));
+
+    // Remove the nested arrays that Supabase returns
+    formatted.forEach(app => {
+      delete app.teaching_experiences;
+      delete app.research_experiences;
+      delete app.research_info;
+    });
+
+    res.json(formatted);
+  } catch (error) {
+    console.error('Error fetching detailed applications:', error);
+    res.status(500).json({ error: error.message || 'Failed to fetch applications' });
+  }
+});
 
 export default router;

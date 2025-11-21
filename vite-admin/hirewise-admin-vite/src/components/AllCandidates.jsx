@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase-client';
-import { API_BASE } from '../lib/config';
+import { candidatesApi } from '../lib/api';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const AllCandidates = () => {
@@ -21,55 +21,8 @@ const AllCandidates = () => {
       try {
         setLoading(true);
         
-        // By default, hide rejected applications from All Candidates view
-        let { data: applicationsData, error: applicationsError } = await supabase
-          .from('faculty_applications')
-          .select('*')
-          .neq('status', 'rejected');
-
-        if (applicationsError) throw applicationsError;
-
-        const candidatesWithDetails = await Promise.all(
-          applicationsData.map(async (application) => {
-            const { data: teachingData } = await supabase
-              .from('teaching_experiences')
-              .select('*')
-              .eq('application_id', application.id);
-
-            const { data: researchData } = await supabase
-              .from('research_experiences')
-              .select('*')
-              .eq('application_id', application.id);
-
-            const { data: researchInfoData } = await supabase
-              .from('research_info')
-              .select(`
-                scopus_id,
-                google_scholar_id,
-                orchid_id,
-                scopus_general_papers,
-                conference_papers,
-                edited_books
-              `)
-              .eq('application_id', application.id)
-              .maybeSingle();
-
-            return {
-              ...application,
-              teachingExperiences: teachingData || [],
-              researchExperiences: researchData || [],
-              researchInfo: researchInfoData || {
-                scopus_general_papers: 0,
-                conference_papers: 0,
-                edited_books: 0
-              },
-              department: application.department || 'other',
-              experience: application.years_of_experience || 'Not specified',
-              publications: researchInfoData?.scopus_general_papers || 0
-            };
-          })
-        );
-
+        // ⚡ OPTIMIZED: Use API client with retry & caching
+        const candidatesWithDetails = await candidatesApi.getAllDetailed(selectedDepartment);
         setCandidates(candidatesWithDetails);
       } catch (err) {
         console.error('Error fetching candidates:', err);
@@ -80,7 +33,7 @@ const AllCandidates = () => {
     };
 
     fetchCandidates();
-  }, []);
+  }, [selectedDepartment]); // Re-fetch when department filter changes
 
   const handleViewDetails = (candidate) => {
     setSelectedCandidate(candidate);

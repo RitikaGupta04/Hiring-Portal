@@ -1,6 +1,8 @@
 // server/server.js
 import express from 'express';
 import cors from 'cors';
+import compression from 'compression';
+import rateLimit from 'express-rate-limit';
 import applicationsRoute from './routes/applications.js';
 import documentsRoute from './routes/documents.js';
 import mlRoute from './routes/ml.js';
@@ -9,7 +11,30 @@ import authRoute from './routes/auth.js';
 // ✅ 1. Create the app FIRST
 const app = express();
 
-// ✅ 2. Configure CORS
+// ✅ 2. Enable gzip compression for ALL responses (reduces payload by 70-90%)
+app.use(compression({
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    return compression.filter(req, res);
+  },
+  level: 6 // Balance between speed and compression ratio
+}));
+
+// ✅ 3. Rate limiting to prevent abuse
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Too many requests from this IP, please try again later.'
+});
+
+// Apply to all API routes
+app.use('/api/', apiLimiter);
+
+// ✅ 4. Configure CORS
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
@@ -37,10 +62,15 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 }));
 
-// ✅ 3. Apply middleware
-app.use(express.json());
+// ✅ 5. Apply middleware
+app.use(express.json({ limit: '10mb' })); // Increase limit for file uploads
 
-// ✅ 4. Define routes
+// ✅ 6. Health check endpoint (for monitoring/keep-alive)
+app.get("/", (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// ✅ 7. Define routes
 app.get("/api", (req, res) => {
   res.json({ users: ["maxx1", "maxx2", "maxx3"] });
 });
@@ -50,8 +80,19 @@ app.use("/api/documents", documentsRoute);
 app.use("/api/ml", mlRoute);
 app.use("/api/auth", authRoute);
 
-// ✅ 5. Start server
+// ✅ 8. Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Server error:', err);
+  res.status(500).json({ 
+    error: 'Internal server error',
+    message: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+});
+
+// ✅ 9. Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📦 Compression: ENABLED`);
+  console.log(`🛡️  Rate limiting: ENABLED`);
 });
