@@ -24,42 +24,32 @@ export default function StatsCardsClient({ selectedView = 'teaching' }) {
       try {
         setLoading(true)
 
-        // Build base queries with position filter
-        const baseQuery = (status = null) => {
-          let query = supabase.from('faculty_applications').select('*', { count: 'exact' });
-          
-          // Filter by teaching/non-teaching
-          if (selectedView === 'teaching') {
-            query = query.or('position.ilike.%professor%,position.eq.teaching');
-          } else {
-            query = query.not('position', 'ilike', '%professor%').neq('position', 'teaching');
-          }
-          
-          // Add status filter if provided
-          if (status) {
-            query = query.eq('status', status);
-          }
-          
-          return query;
-        };
+        // Fetch only the necessary fields for counting (much faster)
+        let query = supabase
+          .from('faculty_applications')
+          .select('position, status', { count: 'exact', head: false });
+        
+        // Filter by teaching/non-teaching
+        if (selectedView === 'teaching') {
+          query = query.or('position.ilike.%professor%,position.eq.teaching');
+        } else {
+          query = query.not('position', 'ilike', '%professor%').neq('position', 'teaching');
+        }
 
-        const [
-          { count: total },
-          { count: inReview },
-          { count: shortlisted },
-          { count: rejected }
-        ] = await Promise.all([
-          baseQuery(),
-          baseQuery('in_review'),
-          baseQuery('shortlisted'),
-          baseQuery('rejected')
-        ])
+        const { data, error, count } = await query;
+        
+        if (error) throw error;
+
+        // Calculate counts from the single query result
+        const inReview = data?.filter(app => app.status === 'in_review').length || 0;
+        const shortlisted = data?.filter(app => app.status === 'shortlisted').length || 0;
+        const rejected = data?.filter(app => app.status === 'rejected').length || 0;
 
         setStats({
-          total: total || 0,
-          inReview: inReview || 0,
-          shortlisted: shortlisted || 0,
-          rejected: rejected || 0
+          total: count || 0,
+          inReview,
+          shortlisted,
+          rejected
         })
       } catch (err) {
         setError(err.message)
@@ -81,6 +71,13 @@ export default function StatsCardsClient({ selectedView = 'teaching' }) {
         .select('id, first_name, last_name, email, position, department, status, created_at')
         .order('created_at', { ascending: false })
         .limit(50)
+
+      // Filter by teaching/non-teaching
+      if (selectedView === 'teaching') {
+        query = query.or('position.ilike.%professor%,position.eq.teaching');
+      } else {
+        query = query.not('position', 'ilike', '%professor%').neq('position', 'teaching');
+      }
 
       if (kind === 'in_review' || kind === 'shortlisted' || kind === 'rejected') {
         query = query.eq('status', kind)
