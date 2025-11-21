@@ -1624,10 +1624,39 @@ const ResearchInformation = ({ formData, setFormData, onNext, onPrevious, onSave
 
 // Step 6: Documentation
 const Documentation = ({ formData, setFormData, onPrevious, onSubmit, onSaveExit, submitting }) => {
+  const [errors, setErrors] = useState({});
+
   const handleFileChange = (e, field) => {
     const file = e.target.files[0];
     if (file) {
       setFormData((prev) => ({ ...prev, [field]: file }));
+      // Clear error when file is selected
+      setErrors((prev) => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const validateAndSubmit = () => {
+    const newErrors = {};
+    
+    if (!formData.teachingStatement) {
+      newErrors.teachingStatement = 'Teaching Statement is required';
+    }
+    if (!formData.researchStatement) {
+      newErrors.researchStatement = 'Research Statement is required';
+    }
+    if (!formData.cvPath) {
+      newErrors.cvPath = 'CV is required';
+    }
+    if (!formData.otherPublications) {
+      newErrors.otherPublications = 'Top 3 Published Papers is required';
+    }
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length === 0) {
+      onSubmit();
+    } else {
+      alert('Please upload all required documents marked with *');
     }
   };
 
@@ -1640,10 +1669,12 @@ const Documentation = ({ formData, setFormData, onPrevious, onSubmit, onSaveExit
       <div className="form-field">
         <label>Teaching Statement *</label>
         <input type="file" onChange={(e) => handleFileChange(e, 'teachingStatement')} />
+        {errors.teachingStatement && <span className="error">{errors.teachingStatement}</span>}
       </div>
       <div className="form-field">
         <label>Research Statement *</label>
         <input type="file" onChange={(e) => handleFileChange(e, 'researchStatement')} />
+        {errors.researchStatement && <span className="error">{errors.researchStatement}</span>}
       </div>
       <div className="form-field">
         <label>Upload CV *</label>
@@ -1652,10 +1683,12 @@ const Documentation = ({ formData, setFormData, onPrevious, onSubmit, onSaveExit
           accept=".pdf,.doc,.docx" 
           onChange={(e) => handleFileChange(e, 'cvPath')} 
         />
+        {errors.cvPath && <span className="error">{errors.cvPath}</span>}
       </div>
       <div className="form-field">
         <label>Top 3 Published Papers (1 compiled PDF)*</label>
         <input type="file" onChange={(e) => handleFileChange(e, 'otherPublications')} />
+        {errors.otherPublications && <span className="error">{errors.otherPublications}</span>}
       </div>
       <div className="form-buttons">
         <div style={{ flex: 1 }}>
@@ -1675,7 +1708,7 @@ const Documentation = ({ formData, setFormData, onPrevious, onSubmit, onSaveExit
           <button
             type="button"
             className="btn btn-primary"
-            onClick={onSubmit}
+            onClick={validateAndSubmit}
             disabled={submitting}
             aria-busy={submitting}
             style={{
