@@ -248,8 +248,9 @@ body {
   font-weight: 500;
 }
 .figma-input::placeholder {
-  color: #6b7280;
-  font-size: 0.95rem;
+  color: #007bff;
+  font-size: 1rem;
+  font-weight: 500;
   opacity: 1;
 }
 .figma-input:focus {
