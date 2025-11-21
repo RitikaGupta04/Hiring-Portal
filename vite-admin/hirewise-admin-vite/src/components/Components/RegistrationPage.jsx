@@ -271,6 +271,7 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
 
               <form className="figma-form" onSubmit={handleLoginSubmit} autoComplete="off">
                 <div className="figma-form-group">
+                  <label htmlFor="loginUsername" style={{ display: 'block', marginBottom: '8px', color: '#007bff', fontSize: '1rem', fontWeight: '600' }}>Email Address</label>
                   <input 
                     className="figma-input" 
                     type="text" 
@@ -280,9 +281,9 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
                     onChange={(e) => setLoginUsername(e.target.value)} 
                     required 
                     autoComplete="off" 
-                    placeholder="Email Address"
+                    placeholder="Enter your email"
                     style={{ 
-                      fontSize: '1.1rem', 
+                      fontSize: '1rem', 
                       padding: '14px 16px',
                       border: '2px solid #9ca3af',
                       borderRadius: '12px',
@@ -291,15 +292,9 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
                     }}
                   />
                 </div>
-                <style dangerouslySetInnerHTML={{__html: `
-                  #loginUsername::placeholder {
-                    color: #007bff !important;
-                    font-weight: 600 !important;
-                    opacity: 1 !important;
-                  }
-                `}} />
 
                 <div className="figma-form-group">
+                  <label htmlFor="loginPassword" style={{ display: 'block', marginBottom: '8px', color: '#007bff', fontSize: '1rem', fontWeight: '600' }}>Password</label>
                   <input 
                     className="figma-input" 
                     type="password" 
@@ -309,9 +304,9 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
                     onChange={(e) => setLoginPassword(e.target.value)} 
                     required 
                     autoComplete="off" 
-                    placeholder="Password"
+                    placeholder="Enter your password"
                     style={{ 
-                      fontSize: '1.1rem', 
+                      fontSize: '1rem', 
                       padding: '14px 16px',
                       border: '2px solid #9ca3af',
                       borderRadius: '12px',
@@ -320,13 +315,6 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
                     }}
                   />
                 </div>
-                <style dangerouslySetInnerHTML={{__html: `
-                  #loginPassword::placeholder {
-                    color: #007bff !important;
-                    font-weight: 600 !important;
-                    opacity: 1 !important;
-                  }
-                `}} />
                 {loginError && <div className="figma-error">{loginError}</div>}
                 <button 
                   className="figma-apply-btn" 
