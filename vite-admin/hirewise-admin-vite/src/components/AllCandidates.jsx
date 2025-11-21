@@ -355,22 +355,22 @@ const AllCandidates = () => {
                   <div className="bg-white border rounded-lg p-4 shadow-sm">
                     <h3 className="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Research Identifiers</h3>
                     <div className="space-y-2">
-                      {selectedCandidate.researchInfo?.scopus_id && (
+                      {selectedCandidate.scopus_id && (
                         <div>
                           <p className="text-xs font-semibold text-gray-500 uppercase">Scopus ID</p>
-                          <p className="text-sm text-gray-900">{selectedCandidate.researchInfo.scopus_id}</p>
+                          <p className="text-sm text-gray-900">{selectedCandidate.scopus_id}</p>
                         </div>
                       )}
-                      {selectedCandidate.researchInfo?.google_scholar_id && (
+                      {selectedCandidate.google_scholar_id && (
                         <div>
-                          <p className="text-xs font-semibold text-gray-500 uppercase">Google Scholar ID</p>
-                          <p className="text-sm text-gray-900">{selectedCandidate.researchInfo.google_scholar_id}</p>
+                          <p className="text-xs font-semibold text-gray-500 uppercase">Google Scholar Link</p>
+                          <a href={selectedCandidate.google_scholar_id} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline break-all">{selectedCandidate.google_scholar_id}</a>
                         </div>
                       )}
-                      {selectedCandidate.researchInfo?.orchid_id && (
+                      {selectedCandidate.orchid_id && (
                         <div>
                           <p className="text-xs font-semibold text-gray-500 uppercase">ORCID</p>
-                          <p className="text-sm text-gray-900">{selectedCandidate.researchInfo.orchid_id}</p>
+                          <p className="text-sm text-gray-900">{selectedCandidate.orchid_id}</p>
                         </div>
                       )}
                     </div>
@@ -385,15 +385,15 @@ const AllCandidates = () => {
                     <div className="grid grid-cols-3 gap-3">
                       <div className="bg-white rounded-lg p-3 text-center shadow">
                         <p className="text-xs font-semibold text-purple-600 uppercase mb-1">Scopus</p>
-                        <p className="text-3xl font-bold text-purple-700">{selectedCandidate.researchInfo?.scopus_general_papers ?? 0}</p>
+                        <p className="text-3xl font-bold text-purple-700">{selectedCandidate.scopus_general_papers ?? 0}</p>
                       </div>
                       <div className="bg-white rounded-lg p-3 text-center shadow">
                         <p className="text-xs font-semibold text-blue-600 uppercase mb-1">Conference</p>
-                        <p className="text-3xl font-bold text-blue-700">{selectedCandidate.researchInfo?.conference_papers ?? 0}</p>
+                        <p className="text-3xl font-bold text-blue-700">{selectedCandidate.conference_papers ?? 0}</p>
                       </div>
                       <div className="bg-white rounded-lg p-3 text-center shadow">
                         <p className="text-xs font-semibold text-green-600 uppercase mb-1">Books</p>
-                        <p className="text-3xl font-bold text-green-700">{selectedCandidate.researchInfo?.edited_books ?? 0}</p>
+                        <p className="text-3xl font-bold text-green-700">{selectedCandidate.edited_books ?? 0}</p>
                       </div>
                     </div>
                   </div>
@@ -405,9 +405,9 @@ const AllCandidates = () => {
                       <PieChart>
                         <Pie
                           data={[
-                            { name: 'Scopus Papers', value: selectedCandidate.researchInfo?.scopus_general_papers || 0, color: '#8b5cf6' },
-                            { name: 'Conference Papers', value: selectedCandidate.researchInfo?.conference_papers || 0, color: '#3b82f6' },
-                            { name: 'Edited Books', value: selectedCandidate.researchInfo?.edited_books || 0, color: '#10b981' }
+                            { name: 'Scopus Papers', value: selectedCandidate.scopus_general_papers || 0, color: '#8b5cf6' },
+                            { name: 'Conference Papers', value: selectedCandidate.conference_papers || 0, color: '#3b82f6' },
+                            { name: 'Edited Books', value: selectedCandidate.edited_books || 0, color: '#10b981' }
                           ].filter(item => item.value > 0)}
                           cx="50%"
                           cy="50%"
@@ -418,9 +418,9 @@ const AllCandidates = () => {
                           dataKey="value"
                         >
                           {[
-                            { name: 'Scopus Papers', value: selectedCandidate.researchInfo?.scopus_general_papers || 0, color: '#8b5cf6' },
-                            { name: 'Conference Papers', value: selectedCandidate.researchInfo?.conference_papers || 0, color: '#3b82f6' },
-                            { name: 'Edited Books', value: selectedCandidate.researchInfo?.edited_books || 0, color: '#10b981' }
+                            { name: 'Scopus Papers', value: selectedCandidate.scopus_general_papers || 0, color: '#8b5cf6' },
+                            { name: 'Conference Papers', value: selectedCandidate.conference_papers || 0, color: '#3b82f6' },
+                            { name: 'Edited Books', value: selectedCandidate.edited_books || 0, color: '#10b981' }
                           ].filter(item => item.value > 0).map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
@@ -530,21 +530,21 @@ const AllCandidates = () => {
                     <h3 className="text-sm font-bold text-gray-900 mb-3">Application Status</h3>
                     <div className="flex items-center space-x-2">
                       <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        selectedCandidate.status === 'approved' ? 'bg-green-100 text-green-700' :
+                        selectedCandidate.status === 'shortlisted' ? 'bg-green-100 text-green-700' :
                         selectedCandidate.status === 'rejected' ? 'bg-red-100 text-red-700' :
                         'bg-yellow-100 text-yellow-700'
                       }`}>
-                        {selectedCandidate.status || 'Pending'}
+                        {selectedCandidate.status === 'in_review' ? 'in_review' : selectedCandidate.status || 'in_review'}
                       </span>
                       <button
-                        onClick={() => handleStatusUpdate(selectedCandidate.id, 'approved')}
+                        onClick={() => updateApplicationStatus('shortlisted')}
                         className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-xs"
                         disabled={updatingStatus}
                       >
                         Approve
                       </button>
                       <button
-                        onClick={() => handleStatusUpdate(selectedCandidate.id, 'rejected')}
+                        onClick={() => updateApplicationStatus('rejected')}
                         className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-xs"
                         disabled={updatingStatus}
                       >
