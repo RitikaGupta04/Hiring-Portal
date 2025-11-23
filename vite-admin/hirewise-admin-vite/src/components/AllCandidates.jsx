@@ -34,11 +34,12 @@ const AllCandidates = () => {
       
       if (error) throw error;
       
-      // Filter out rejected and deleted candidates in JavaScript
+      // Filter out rejected, deleted, and shortlisted candidates in JavaScript
       const filteredData = (data || []).filter(candidate => 
         candidate.status !== 'rejected' && 
         candidate.status !== 'deleted' &&
-        candidate.status !== 'Deleted'
+        candidate.status !== 'Deleted' &&
+        candidate.status !== 'shortlisted'
       );
       
       console.log('Fetched candidates:', data?.length, 'total, filtered to:', filteredData.length);
@@ -146,8 +147,8 @@ const AllCandidates = () => {
       // Close modal first
       closeModal();
       
-      // Immediately remove from local state if rejected or deleted
-      if (nextStatus === 'rejected' || nextStatus === 'deleted') {
+      // Immediately remove from local state if rejected, deleted, or shortlisted
+      if (nextStatus === 'rejected' || nextStatus === 'deleted' || nextStatus === 'shortlisted') {
         setCandidates(prev => prev.filter(c => c.id !== selectedCandidate.id));
         alert(`Application ${nextStatus} and removed from list.`);
       } else {
