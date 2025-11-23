@@ -348,10 +348,9 @@ const getPositionFilterOptions = () => {
                       Teaching
                     </button>
                     <button
-                      onClick={() => handleViewChange('non-teaching')}
-                      className={`w-full text-left px-4 py-2 hover:bg-gray-50 ${
-                        selectedView === 'non-teaching' ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
-                      }`}
+                      disabled
+                      className="w-full text-left px-4 py-2 text-gray-400 cursor-not-allowed"
+                      title="Non-Teaching option is disabled"
                     >
                       Non-Teaching
                     </button>
