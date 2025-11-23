@@ -6,6 +6,7 @@ import AdminApp from './components/AdminLayout';
 import CombinedMultiStepForm from './components/Components/MultiStepForm/CombinedMultiStepForm';
 import ProtectedRoute from './components/Components/ProtectedRoute/ProtectedRoute';
 import FacultyPage from './components/FacultyPage';
+import FacultyLayout from './components/FacultyLayout';
 import { API_BASE } from './lib/config';
 import './App.css';
 
@@ -64,6 +65,9 @@ function App() {
 
         {/* Admin routes */}
         <Route path="/admin/*" element={<AdminApp />} />
+        
+        {/* Faculty Portal routes */}
+        <Route path="/faculty-portal/*" element={<FacultyLayout />} />
       </Routes>
     </>
   );
