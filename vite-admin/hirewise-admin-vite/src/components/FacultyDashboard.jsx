@@ -48,7 +48,15 @@ const FacultyDashboard = () => {
         })
       );
       
-      const validCandidates = candidatesWithFullData.filter(c => c !== null);
+      // Filter out null values and rejected/shortlisted/deleted candidates
+      const validCandidates = candidatesWithFullData.filter(c => 
+        c !== null && 
+        c.status !== 'rejected' && 
+        c.status !== 'deleted' && 
+        c.status !== 'Deleted' &&
+        c.status !== 'shortlisted'
+      );
+      
       setCandidates(validCandidates);
     } catch (err) {
       console.error('Error fetching candidates:', err);
@@ -108,6 +116,13 @@ const FacultyDashboard = () => {
   // Update application status: 'shortlisted' or 'rejected'
   const updateApplicationStatus = async (nextStatus) => {
     if (!selectedCandidate?.id) return;
+    
+    const confirmMessage = nextStatus === 'rejected' 
+      ? 'Are you sure you want to reject this candidate? This will permanently remove them from all lists.'
+      : 'Are you sure you want to shortlist this candidate? They will be moved to the shortlisted stage.';
+    
+    if (!confirm(confirmMessage)) return;
+    
     try {
       setUpdatingStatus(true);
       const { error: updErr } = await supabase
@@ -119,10 +134,14 @@ const FacultyDashboard = () => {
       // Close modal first
       closeModal();
       
-      // Remove from local state since faculty only sees assigned candidates
+      // Remove from local state - both rejected and shortlisted are removed from active review
       setCandidates(prev => prev.filter(c => c.id !== selectedCandidate.id));
       
-      alert(`Application ${nextStatus === 'shortlisted' ? 'shortlisted' : 'rejected'} successfully!`);
+      const successMessage = nextStatus === 'rejected'
+        ? 'Candidate rejected and removed from all lists.'
+        : 'Candidate shortlisted and moved to next stage!';
+      
+      alert(successMessage);
       
     } catch (e) {
       console.error('Status update failed:', e);
