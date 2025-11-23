@@ -21,8 +21,8 @@ const AllCandidates = () => {
   const departments = ['All', 'law', 'liberal', 'engineering', 'management'];
   
   const facultyMembers = [
-    { id: 1, name: 'Kiran Sharma', email: 'kiran.sharma@university.edu' },
-    { id: 2, name: 'Ziya Khan', email: 'ziya.khan@university.edu' }
+    { id: 1, name: 'Kiran Sharma', email: 'kiran.sharma@bmu.edu.in' },
+    { id: 2, name: 'Ziya Khan', email: 'ziya.khan@bmu.edu.in' }
   ];
 
   const fetchCandidates = async () => {

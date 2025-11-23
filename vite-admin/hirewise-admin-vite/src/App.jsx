@@ -5,6 +5,7 @@ import RegistrationPage from './components/Components/RegistrationPage';
 import AdminApp from './components/AdminLayout';
 import CombinedMultiStepForm from './components/Components/MultiStepForm/CombinedMultiStepForm';
 import ProtectedRoute from './components/Components/ProtectedRoute/ProtectedRoute';
+import FacultyPage from './components/FacultyPage';
 import { API_BASE } from './lib/config';
 import './App.css';
 
@@ -54,6 +55,7 @@ function App() {
         {/* Public routes */}
         <Route path="/" element={<Navigate to="/register" replace />} />
         <Route path="/register" element={<RegistrationPage />} />
+        <Route path="/faculty" element={<FacultyPage />} />
 
         {/* 🔒 Protected route: Only authenticated users can access */}
         <Route element={<ProtectedRoute />}>
