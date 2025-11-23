@@ -15,7 +15,7 @@ const AllCandidates = () => {
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [candidateToAssign, setCandidateToAssign] = useState(null);
-  const [selectedFaculty, setSelectedFaculty] = useState([]);
+  const [selectedFaculty, setSelectedFaculty] = useState(null);
   const [assignments, setAssignments] = useState(() => {
     // Load assignments from localStorage on mount
     const saved = localStorage.getItem('facultyAssignments');
@@ -281,7 +281,7 @@ const AllCandidates = () => {
                         onClick={() => {
                           setCandidateToAssign(candidate);
                           setShowAssignModal(true);
-                          setSelectedFaculty([]);
+                          setSelectedFaculty(null);
                         }}
                         className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
                       >
@@ -309,7 +309,7 @@ const AllCandidates = () => {
                 onClick={() => {
                   setShowAssignModal(false);
                   setCandidateToAssign(null);
-                  setSelectedFaculty([]);
+                  setSelectedFaculty(null);
                 }}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
@@ -326,23 +326,18 @@ const AllCandidates = () => {
             </div>
 
             <div className="space-y-3 mb-6">
-              <p className="text-sm font-medium text-gray-700">Select Faculty Members:</p>
+              <p className="text-sm font-medium text-gray-700">Select Faculty Member:</p>
               {facultyMembers.map((faculty) => (
                 <label
                   key={faculty.id}
                   className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
                 >
                   <input
-                    type="checkbox"
-                    checked={selectedFaculty.includes(faculty.id)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedFaculty([...selectedFaculty, faculty.id]);
-                      } else {
-                        setSelectedFaculty(selectedFaculty.filter(id => id !== faculty.id));
-                      }
-                    }}
-                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                    type="radio"
+                    name="faculty"
+                    checked={selectedFaculty === faculty.id}
+                    onChange={() => setSelectedFaculty(faculty.id)}
+                    className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                   />
                   <div className="ml-3">
                     <p className="text-sm font-medium text-gray-900">{faculty.name}</p>
@@ -355,28 +350,25 @@ const AllCandidates = () => {
             <div className="flex space-x-3">
               <button
                 onClick={() => {
-                  if (selectedFaculty.length > 0) {
-                    const selectedNames = facultyMembers
-                      .filter(f => selectedFaculty.includes(f.id))
-                      .map(f => f.name)
-                      .join(', ');
+                  if (selectedFaculty) {
+                    const selectedFacultyName = facultyMembers.find(f => f.id === selectedFaculty)?.name;
                     
                     // Save assignment
                     const newAssignments = {
                       ...assignments,
-                      [candidateToAssign.id]: selectedFaculty
+                      [candidateToAssign.id]: [selectedFaculty]
                     };
                     setAssignments(newAssignments);
                     
                     // Persist to localStorage
                     localStorage.setItem('facultyAssignments', JSON.stringify(newAssignments));
                     
-                    alert(`Assigned ${candidateToAssign.first_name} ${candidateToAssign.last_name} to: ${selectedNames}`);
+                    alert(`Assigned ${candidateToAssign.first_name} ${candidateToAssign.last_name} to: ${selectedFacultyName}`);
                     setShowAssignModal(false);
                     setCandidateToAssign(null);
-                    setSelectedFaculty([]);
+                    setSelectedFaculty(null);
                   } else {
-                    alert('Please select at least one faculty member');
+                    alert('Please select a faculty member');
                   }
                 }}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-medium"
@@ -387,7 +379,7 @@ const AllCandidates = () => {
                 onClick={() => {
                   setShowAssignModal(false);
                   setCandidateToAssign(null);
-                  setSelectedFaculty([]);
+                  setSelectedFaculty(null);
                 }}
                 className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg transition-colors font-medium"
               >
