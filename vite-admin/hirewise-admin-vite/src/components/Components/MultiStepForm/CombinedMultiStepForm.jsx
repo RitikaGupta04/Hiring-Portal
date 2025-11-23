@@ -712,7 +712,7 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
             <option value="cgpa4">CGPA (Out of 4)</option>
           </select>
         </div>
-        <div className="form-field">
+        <div className="form-field" style={{ marginLeft: '20px' }}>
           <label htmlFor="bachelorCgpa">
             {formData.bachelorCgpaScale === 'percentage' ? 'Percentage*' : 
              formData.bachelorCgpaScale === 'cgpa10' ? 'CGPA (Out of 10)*' : 'CGPA (Out of 4)*'}
@@ -842,7 +842,7 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
             <option value="cgpa4">CGPA (Out of 4)</option>
           </select>
         </div>
-        <div className="form-field">
+        <div className="form-field" style={{ marginLeft: '20px' }}>
           <label htmlFor="masterCgpa">
             {formData.masterCgpaScale === 'percentage' ? 'Percentage*' : 
              formData.masterCgpaScale === 'cgpa10' ? 'CGPA (Out of 10)*' : 'CGPA (Out of 4)*'}
