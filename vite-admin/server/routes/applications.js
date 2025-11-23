@@ -440,20 +440,31 @@ router.post(
         }
       }
 
-      // Insert research info
-      if (researchInfo.scopus_id || researchInfo.google_scholar_id) {
+      // Insert research info (always insert if research data exists)
+      if (researchInfo && (
+        researchInfo.scopus_id || 
+        researchInfo.google_scholar_id || 
+        researchInfo.orchid_id ||
+        researchInfo.scopus_general_papers || 
+        researchInfo.conference_papers || 
+        researchInfo.edited_books
+      )) {
         const { error: infoError } = await supabase
           .from('research_info')
           .insert({
             application_id: applicationId,
-            scopus_id: researchInfo.scopus_id,
-            orchid_id: researchInfo.orchid_id,
-            google_scholar_id: researchInfo.google_scholar_id,
-            scopus_general_papers: researchInfo.scopus_general_papers || 0,
-            conference_papers: researchInfo.conference_papers || 0,
-            edited_books: researchInfo.edited_books || 0
+            scopus_id: researchInfo.scopus_id || null,
+            orchid_id: researchInfo.orchid_id || null,
+            google_scholar_id: researchInfo.google_scholar_id || null,
+            scopus_general_papers: parseInt(researchInfo.scopus_general_papers) || 0,
+            conference_papers: parseInt(researchInfo.conference_papers) || 0,
+            edited_books: parseInt(researchInfo.edited_books) || 0
           });
-        if (infoError) console.warn('Research info insert failed:', infoError);
+        if (infoError) {
+          console.error('Research info insert failed:', infoError);
+        } else {
+          console.log('✅ Research info saved:', researchInfo);
+        }
       }
 
       // Trigger scoring and report asynchronously (don't block response)
