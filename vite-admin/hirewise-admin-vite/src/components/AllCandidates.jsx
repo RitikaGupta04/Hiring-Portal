@@ -271,14 +271,8 @@ const AllCandidates = () => {
                     </button>
                     {assignments[candidate.id] ? (
                       <button
-                        onClick={() => {
-                          const assignedFaculty = facultyMembers
-                            .filter(f => assignments[candidate.id].includes(f.id))
-                            .map(f => f.name)
-                            .join(', ');
-                          alert(`This candidate is assigned to: ${assignedFaculty}`);
-                        }}
-                        className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+                        disabled
+                        className="bg-gray-400 text-white px-4 py-2 rounded-lg cursor-not-allowed"
                       >
                         Assigned
                       </button>
