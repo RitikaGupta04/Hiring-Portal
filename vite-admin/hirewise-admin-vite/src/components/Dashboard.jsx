@@ -586,11 +586,12 @@ const getPositionFilterOptions = () => {
                         }
                       </td>
                       <td className="py-2 px-2 text-xl text-gray-700">
-                        {candidate.teachingPost || candidate.positionApplied || candidate.position || 'N/A'}
+                        {(candidate.teachingPost || candidate.positionApplied || candidate.position || 'N/A')
+                          .split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')}
                       </td>
                       <td className="py-2 px-2">
                         <span className={`inline-flex px-2 py-1 text-lg font-medium rounded-full ${getDepartmentColor(candidate.department)}`}>
-                          {candidate.department || 'N/A'}
+                          {(candidate.department || 'N/A').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')}
                         </span>
                       </td>
                       <td className="py-2 px-2 text-xl font-bold text-gray-900">
