@@ -256,6 +256,7 @@ const getPositionFilterOptions = () => {
     // Fetch complete application details including education, experience, etc.
     try {
       const fullData = await candidatesApi.getById(candidate.id);
+      console.log('Full candidate data fetched:', fullData); // Debug log
       setSelectedCandidate({ 
         ...candidate, 
         ...fullData,
@@ -708,10 +709,14 @@ const getPositionFilterOptions = () => {
                       <div className="bg-white border rounded-lg p-4 shadow-sm">
                         <h3 className="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Basic Information</h3>
                         <div className="space-y-3">
+                          <div>
+                            <p className="text-xs font-semibold text-gray-500 uppercase">Email</p>
+                            <p className="text-sm text-gray-900">{selectedCandidate.email || 'N/A'}</p>
+                          </div>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <p className="text-xs font-semibold text-gray-500 uppercase">Position Applied</p>
-                              <p className="text-sm text-gray-900">{selectedCandidate.positionApplied || selectedCandidate.position || 'N/A'}</p>
+                              <p className="text-sm text-gray-900">{selectedCandidate.positionApplied || selectedCandidate.position || selectedCandidate.teachingPost || 'N/A'}</p>
                             </div>
                             <div>
                               <p className="text-xs font-semibold text-gray-500 uppercase">Department</p>
@@ -722,12 +727,12 @@ const getPositionFilterOptions = () => {
                           </div>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <p className="text-xs font-semibold text-gray-500 uppercase">School</p>
-                              <p className="text-sm text-gray-900">{selectedCandidate.school || 'N/A'}</p>
+                              <p className="text-xs font-semibold text-gray-500 uppercase">Date of Birth</p>
+                              <p className="text-sm text-gray-900">{selectedCandidate.date_of_birth ? new Date(selectedCandidate.date_of_birth).toLocaleDateString() : 'N/A'}</p>
                             </div>
                             <div>
-                              <p className="text-xs font-semibold text-gray-500 uppercase">Branch</p>
-                              <p className="text-sm text-gray-900">{selectedCandidate.branch || 'N/A'}</p>
+                              <p className="text-xs font-semibold text-gray-500 uppercase">Nationality</p>
+                              <p className="text-sm text-gray-900">{selectedCandidate.nationality || 'N/A'}</p>
                             </div>
                           </div>
                           <div className="grid grid-cols-2 gap-4">
