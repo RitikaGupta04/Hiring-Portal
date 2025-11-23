@@ -1,54 +1,65 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import { candidatesApi } from '../lib/api';
 import { supabase } from '../../lib/supabase-client';
+import { candidatesApi } from '../lib/api';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-const FacultyDashboard = () => {
-  const location = useLocation();
+const AllCandidates = () => {
   const [selectedCandidate, setSelectedCandidate] = useState(null);
+  const [selectedDepartment, setSelectedDepartment] = useState('All');
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showUpload, setShowUpload] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [files, setFiles] = useState({});
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [candidateToAssign, setCandidateToAssign] = useState(null);
+  const [selectedFaculty, setSelectedFaculty] = useState([]);
+  const [assignments, setAssignments] = useState(() => {
+    // Load assignments from localStorage on mount
+    const saved = localStorage.getItem('facultyAssignments');
+    return saved ? JSON.parse(saved) : {};
+  });
 
-  const facultyInfo = location.state?.facultyInfo || JSON.parse(localStorage.getItem('facultyInfo') || '{}');
+  const departments = ['All', 'law', 'liberal', 'engineering', 'management'];
+  
+  const facultyMembers = [
+    { id: 1, name: 'Kiran Sharma', email: 'kiran.sharma@bmu.edu.in' },
+    { id: 2, name: 'Ziya Khan', email: 'ziya.khan@bmu.edu.in' }
+  ];
 
   const fetchCandidates = async () => {
     try {
       setLoading(true);
       
-      // Get assignments from localStorage
-      const facultyAssignments = JSON.parse(localStorage.getItem('facultyAssignments') || '{}');
+      // Direct Supabase query to get ALL fields including research data
+      let query = supabase
+        .from('faculty_applications')
+        .select('*')
+        .order('created_at', { ascending: false });
       
-      // Find candidate IDs assigned to this faculty
-      const assignedCandidateIds = [];
-      for (const [candidateId, facultyIds] of Object.entries(facultyAssignments)) {
-        if (facultyIds.includes(facultyInfo.id)) {
-          assignedCandidateIds.push(candidateId);
-        }
+      if (selectedDepartment !== 'All') {
+        query = query.eq('department', selectedDepartment);
       }
       
-      if (assignedCandidateIds.length === 0) {
-        setCandidates([]);
-        setLoading(false);
-        return;
-      }
+      const { data, error } = await query;
       
-      // Fetch complete candidate data
-      const candidatesWithFullData = await Promise.all(
-        assignedCandidateIds.map(async (id) => {
-          try {
-            const data = await candidatesApi.getById(id);
-            return data;
-          } catch (error) {
-            console.error(`Error fetching candidate ${id}:`, error);
-            return null;
-          }
-        })
+      if (error) throw error;
+      
+      // Filter out rejected, deleted, and shortlisted candidates in JavaScript
+      const filteredData = (data || []).filter(candidate => 
+        candidate.status !== 'rejected' && 
+        candidate.status !== 'deleted' &&
+        candidate.status !== 'Deleted' &&
+        candidate.status !== 'shortlisted'
       );
       
-      const validCandidates = candidatesWithFullData.filter(c => c !== null);
-      setCandidates(validCandidates);
+      console.log('Fetched candidates:', data?.length, 'total, filtered to:', filteredData.length);
+      console.log('All statuses in DB:', [...new Set(data?.map(c => c.status))]);
+      console.log('First few candidates:', filteredData.slice(0, 5).map(c => ({ id: c.id, name: c.first_name, status: c.status })));
+      
+      setCandidates(filteredData);
     } catch (err) {
       console.error('Error fetching candidates:', err);
       setError(err.message);
@@ -58,12 +69,8 @@ const FacultyDashboard = () => {
   };
 
   useEffect(() => {
-    if (facultyInfo.id) {
-      fetchCandidates();
-    } else {
-      setLoading(false);
-    }
-  }, [facultyInfo.id]); // Re-fetch when department filter changes
+    fetchCandidates();
+  }, [selectedDepartment]); // Re-fetch when department filter changes
 
   const handleViewDetails = async (candidate) => {
     console.log('Opening candidate details for ID:', candidate.id);
@@ -255,30 +262,147 @@ const FacultyDashboard = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex-shrink-0">
+                  <div className="flex-shrink-0 flex space-x-2">
                     <button
                       onClick={() => handleViewDetails(candidate)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors font-medium shadow-md hover:shadow-lg"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
                     >
                       View Details
                     </button>
+                    {assignments[candidate.id] ? (
+                      <button
+                        onClick={() => {
+                          const assignedFaculty = facultyMembers
+                            .filter(f => assignments[candidate.id].includes(f.id))
+                            .map(f => f.name)
+                            .join(', ');
+                          alert(`This candidate is assigned to: ${assignedFaculty}`);
+                        }}
+                        className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+                      >
+                        Assigned
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setCandidateToAssign(candidate);
+                          setShowAssignModal(true);
+                          setSelectedFaculty([]);
+                        }}
+                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+                      >
+                        Assign Faculty
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
             ))
           ) : (
-            <div className="p-12 text-center text-gray-500">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-full mb-4">
-                <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">No Assigned Candidates</h3>
-              <p className="text-gray-600">You don't have any candidates assigned to review yet.</p>
+            <div className="p-6 text-center text-gray-500">
+              No candidates found for the selected department.
             </div>
           )}
         </div>
       </div>
+
+      {showAssignModal && candidateToAssign && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-gray-900">Assign Faculty</h3>
+              <button
+                onClick={() => {
+                  setShowAssignModal(false);
+                  setCandidateToAssign(null);
+                  setSelectedFaculty([]);
+                }}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="mb-4">
+              <p className="text-sm text-gray-600 mb-2">
+                Assigning faculty to review: <span className="font-semibold">{candidateToAssign.first_name} {candidateToAssign.last_name}</span>
+              </p>
+            </div>
+
+            <div className="space-y-3 mb-6">
+              <p className="text-sm font-medium text-gray-700">Select Faculty Members:</p>
+              {facultyMembers.map((faculty) => (
+                <label
+                  key={faculty.id}
+                  className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedFaculty.includes(faculty.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedFaculty([...selectedFaculty, faculty.id]);
+                      } else {
+                        setSelectedFaculty(selectedFaculty.filter(id => id !== faculty.id));
+                      }
+                    }}
+                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                  />
+                  <div className="ml-3">
+                    <p className="text-sm font-medium text-gray-900">{faculty.name}</p>
+                    <p className="text-xs text-gray-500">{faculty.email}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={() => {
+                  if (selectedFaculty.length > 0) {
+                    const selectedNames = facultyMembers
+                      .filter(f => selectedFaculty.includes(f.id))
+                      .map(f => f.name)
+                      .join(', ');
+                    
+                    // Save assignment
+                    const newAssignments = {
+                      ...assignments,
+                      [candidateToAssign.id]: selectedFaculty
+                    };
+                    setAssignments(newAssignments);
+                    
+                    // Persist to localStorage
+                    localStorage.setItem('facultyAssignments', JSON.stringify(newAssignments));
+                    
+                    alert(`Assigned ${candidateToAssign.first_name} ${candidateToAssign.last_name} to: ${selectedNames}`);
+                    setShowAssignModal(false);
+                    setCandidateToAssign(null);
+                    setSelectedFaculty([]);
+                  } else {
+                    alert('Please select at least one faculty member');
+                  }
+                }}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-medium"
+              >
+                Assign Selected
+              </button>
+              <button
+                onClick={() => {
+                  setShowAssignModal(false);
+                  setCandidateToAssign(null);
+                  setSelectedFaculty([]);
+                }}
+                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg transition-colors font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {selectedCandidate && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -650,4 +774,4 @@ const FacultyDashboard = () => {
   );
 };
 
-export default FacultyDashboard;
+export default AllCandidates;
