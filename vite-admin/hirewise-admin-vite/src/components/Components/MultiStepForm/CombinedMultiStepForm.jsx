@@ -6,7 +6,6 @@ import { API_BASE } from '../../../lib/config';
 import { COUNTRY_CODES } from '../../../lib/country-codes';
 import { COUNTRIES } from '../../../lib/countries';
 import { COLLEGES } from '../../../lib/colleges';
-import { scopusApi } from '../../../lib/scopusApi';
 
 // Step 1: PositionSelection
 const PositionSelection = ({ formData, setFormData, onNext, onSaveExit }) => {
@@ -1445,46 +1444,6 @@ const Experience = ({ formData, setFormData, onNext, onPrevious, onSaveExit }) =
 // Step 5: ResearchInformation
 const ResearchInformation = ({ formData, setFormData, onNext, onPrevious, onSaveExit }) => {
   const [errors, setErrors] = useState({});
-  const [fetching, setFetching] = useState(false);
-  const [scopusData, setScopusData] = useState(null);
-  const [autoFetchEnabled, setAutoFetchEnabled] = useState(true);
-
-  // Auto-fetch when Scopus ID reaches 11 digits
-  useEffect(() => {
-    const fetchScopusData = async () => {
-      if (formData.scopusId && /^\d{10,11}$/.test(formData.scopusId) && autoFetchEnabled) {
-        setFetching(true);
-        try {
-          console.log('🔍 Fetching Scopus data for ID:', formData.scopusId);
-          const data = await scopusApi.getCompleteData(formData.scopusId);
-          
-          setScopusData(data);
-          
-          // Auto-fill form fields with fetched data
-          setFormData(prev => ({
-            ...prev,
-            scopus_general_papers: data.summary.journalPapers || 0,
-            conference_papers: data.summary.conferencePapers || 0,
-            edited_books: data.summary.books || 0,
-            orchidId: data.summary.orcidId || prev.orchidId || ''
-          }));
-          
-          alert(`✅ Successfully fetched data!\n\nH-Index: ${data.summary.hIndex}\nTotal Documents: ${data.summary.totalDocuments}\nCitations: ${data.summary.totalCitations}\n\nJournal Papers: ${data.summary.journalPapers}\nConference Papers: ${data.summary.conferencePapers}\nBooks: ${data.summary.books}`);
-          
-        } catch (error) {
-          console.error('Error fetching Scopus data:', error);
-          alert(`❌ Failed to fetch Scopus data: ${error.message}\n\nPlease enter the information manually or check your Scopus ID.`);
-        } finally {
-          setFetching(false);
-        }
-      }
-    };
-
-    // Debounce the fetch to avoid multiple calls
-    const timeoutId = setTimeout(fetchScopusData, 800);
-    return () => clearTimeout(timeoutId);
-  }, [formData.scopusId, autoFetchEnabled]);
-
   const validateForm = () => {
     const newErrors = {};
     if (!formData.scopusId) {
@@ -1532,7 +1491,7 @@ const ResearchInformation = ({ formData, setFormData, onNext, onPrevious, onSave
       <div className="form-fields-row">
         <div className="form-field">
           <label htmlFor="scopusId">
-            Scopus ID* {fetching && <span style={{ color: '#2196F3', marginLeft: '8px' }}>⏳ Fetching data...</span>}
+            Scopus ID*
             <a 
               href="https://www.scopus.com/freelookup/form/author.uri" 
               target="_blank" 
@@ -1549,16 +1508,10 @@ const ResearchInformation = ({ formData, setFormData, onNext, onPrevious, onSave
             name="scopusId"
             value={formData.scopusId || ''}
             onChange={handleInputChange}
-            placeholder="Enter 11-digit Scopus ID - Data will auto-fetch"
+            placeholder="Enter 11-digit Scopus ID"
             maxLength="11"
             pattern="\d{11}"
-            disabled={fetching}
           />
-          {scopusData && (
-            <small style={{ color: '#4CAF50', fontSize: '12px', marginTop: '4px', display: 'block' }}>
-              ✅ Data fetched: H-Index {scopusData.summary.hIndex}, {scopusData.summary.totalDocuments} documents
-            </small>
-          )}
           {errors.scopusId && <span className="error">{errors.scopusId}</span>}
         </div>
         <div className="form-field">

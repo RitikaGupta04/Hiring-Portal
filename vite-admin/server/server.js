@@ -7,7 +7,6 @@ import applicationsRoute from './routes/applications.js';
 import documentsRoute from './routes/documents.js';
 import mlRoute from './routes/ml.js';
 import authRoute from './routes/auth.js';
-import scopusRoute from './routes/scopus.js';
 
 // ✅ 1. Create the app FIRST
 const app = express();
@@ -80,7 +79,6 @@ app.use("/api/applications", applicationsRoute);
 app.use("/api/documents", documentsRoute);
 app.use("/api/ml", mlRoute);
 app.use("/api/auth", authRoute);
-app.use("/api/scopus", scopusRoute);
 
 // ✅ 8. Error handling middleware
 app.use((err, req, res, next) => {
