@@ -581,7 +581,7 @@ const getPositionFilterOptions = () => {
                       </td>
                       <td className="py-2 px-2 text-xl font-medium text-gray-900" style={{ fontFamily: 'Arial, sans-serif' }}>
                         {candidate.first_name 
-                          ? `${candidate.first_name}${candidate.last_name ? ' ' + candidate.last_name : ''}`
+                          ? `${candidate.first_name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')}${candidate.last_name ? ' ' + candidate.last_name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ') : ''}`
                           : 'N/A'
                         }
                       </td>
