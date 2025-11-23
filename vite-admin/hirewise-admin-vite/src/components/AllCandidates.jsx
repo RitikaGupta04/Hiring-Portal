@@ -16,6 +16,7 @@ const AllCandidates = () => {
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [candidateToAssign, setCandidateToAssign] = useState(null);
   const [selectedFaculty, setSelectedFaculty] = useState(null);
+  const [facultyMembers, setFacultyMembers] = useState([]);
   const [assignments, setAssignments] = useState(() => {
     // Load assignments from localStorage on mount
     const saved = localStorage.getItem('facultyAssignments');
@@ -24,10 +25,37 @@ const AllCandidates = () => {
 
   const departments = ['All', 'law', 'liberal', 'engineering', 'management'];
   
-  const facultyMembers = [
-    { id: 1, name: 'Kiran Sharma', email: 'kiran.sharma@bmu.edu.in' },
-    { id: 2, name: 'Ziya Khan', email: 'ziya.khan@bmu.edu.in' }
-  ];
+  // Load faculty members from CSV
+  useEffect(() => {
+    const loadFacultyMembers = async () => {
+      try {
+        const response = await fetch('/faculty-members.csv');
+        const text = await response.text();
+        const lines = text.trim().split('\n');
+        const headers = lines[0].split(',');
+        
+        const faculty = lines.slice(1).map(line => {
+          const values = line.split(',');
+          return {
+            id: parseInt(values[0]),
+            name: values[1],
+            email: values[2]
+          };
+        });
+        
+        setFacultyMembers(faculty);
+      } catch (error) {
+        console.error('Error loading faculty members:', error);
+        // Fallback to default
+        setFacultyMembers([
+          { id: 1, name: 'Kiran Sharma', email: 'kiran.sharma@bmu.edu.in' },
+          { id: 2, name: 'Ziya Khan', email: 'ziya.uddin@bmu.edu.in' }
+        ]);
+      }
+    };
+    
+    loadFacultyMembers();
+  }, []);
 
   const fetchCandidates = async () => {
     try {

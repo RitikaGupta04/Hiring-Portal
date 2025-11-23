@@ -1,14 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const FacultyPage = () => {
   const [email, setEmail] = useState('');
+  const [facultyMembers, setFacultyMembers] = useState([]);
   const navigate = useNavigate();
 
-  const facultyMembers = [
-    { id: 1, name: 'Kiran Sharma', email: 'kiran.sharma@bmu.edu.in' },
-    { id: 2, name: 'Ziya Khan', email: 'ziya.khan@bmu.edu.in' }
-  ];
+  // Load faculty members from CSV
+  useEffect(() => {
+    const loadFacultyMembers = async () => {
+      try {
+        const response = await fetch('/faculty-members.csv');
+        const text = await response.text();
+        const lines = text.trim().split('\n');
+        
+        const faculty = lines.slice(1).map(line => {
+          const values = line.split(',');
+          return {
+            id: parseInt(values[0]),
+            name: values[1],
+            email: values[2]
+          };
+        });
+        
+        setFacultyMembers(faculty);
+      } catch (error) {
+        console.error('Error loading faculty members:', error);
+        // Fallback to default
+        setFacultyMembers([
+          { id: 1, name: 'Kiran Sharma', email: 'kiran.sharma@bmu.edu.in' },
+          { id: 2, name: 'Ziya Khan', email: 'ziya.uddin@bmu.edu.in' }
+        ]);
+      }
+    };
+    
+    loadFacultyMembers();
+  }, []);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -56,7 +83,7 @@ const FacultyPage = () => {
         
         <div className="mt-6 p-4 bg-gray-50 rounded-lg">
           <p className="text-xs text-gray-600 text-center">
-            Demo emails: kiran.sharma@bmu.edu.in or ziya.khan@bmu.edu.in
+            Demo emails: kiran.sharma@bmu.edu.in or ziya.uddin@bmu.edu.in
           </p>
         </div>
       </div>
