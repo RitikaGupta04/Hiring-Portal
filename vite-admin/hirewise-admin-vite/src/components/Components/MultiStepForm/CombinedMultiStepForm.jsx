@@ -2035,12 +2035,17 @@ const CombinedMultiStepForm = () => {
   }
 
   try {
-    // No artificial timeout - let browser handle naturally (typically 2-5 minutes)
-    // Backend may take 30-60s on first request if server is sleeping
+    // Set a 30 second timeout - if backend takes longer, proceed anyway
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    
     const response = await fetch(API_BASE + '/api/applications', {
       method: 'POST',
-      body: fd
+      body: fd,
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       let errorRes;
