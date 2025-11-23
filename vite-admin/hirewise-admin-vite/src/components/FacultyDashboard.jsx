@@ -131,6 +131,13 @@ const FacultyDashboard = () => {
         .eq('id', selectedCandidate.id);
       if (updErr) throw updErr;
 
+      // Remove from localStorage assignments
+      const facultyAssignments = JSON.parse(localStorage.getItem('facultyAssignments') || '{}');
+      if (facultyAssignments[selectedCandidate.id]) {
+        delete facultyAssignments[selectedCandidate.id];
+        localStorage.setItem('facultyAssignments', JSON.stringify(facultyAssignments));
+      }
+
       // Close modal first
       closeModal();
       
