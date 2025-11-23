@@ -701,21 +701,20 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
         </div>
       </div>
       <div className="form-fields-row">
-        <div className="form-field">
+        <div className="form-field" style={{ flex: '0 0 auto', width: '300px' }}>
           <label htmlFor="bachelorCgpaScale">Grading Scale*</label>
           <select
             id="bachelorCgpaScale"
             name="bachelorCgpaScale"
             value={formData.bachelorCgpaScale || 'percentage'}
             onChange={handleInputChange}
-            style={{ minWidth: '280px', maxWidth: '280px' }}
           >
             <option value="percentage">Percentage (Out of 100)</option>
             <option value="cgpa10">CGPA (Out of 10)</option>
             <option value="cgpa4">CGPA (Out of 4)</option>
           </select>
         </div>
-        <div className="form-field" style={{ marginLeft: '20px' }}>
+        <div className="form-field" style={{ flex: '0 0 auto', width: '220px' }}>
           <label htmlFor="bachelorCgpa">
             {formData.bachelorCgpaScale === 'percentage' ? 'Percentage*' : 
              formData.bachelorCgpaScale === 'cgpa10' ? 'CGPA (Out of 10)*' : 'CGPA (Out of 4)*'}
@@ -834,21 +833,20 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
         </div>
       </div>
       <div className="form-fields-row">
-        <div className="form-field">
+        <div className="form-field" style={{ flex: '0 0 auto', width: '300px' }}>
           <label htmlFor="masterCgpaScale">Grading Scale*</label>
           <select
             id="masterCgpaScale"
             name="masterCgpaScale"
             value={formData.masterCgpaScale || 'percentage'}
             onChange={handleInputChange}
-            style={{ minWidth: '280px', maxWidth: '280px' }}
           >
             <option value="percentage">Percentage (Out of 100)</option>
             <option value="cgpa10">CGPA (Out of 10)</option>
             <option value="cgpa4">CGPA (Out of 4)</option>
           </select>
         </div>
-        <div className="form-field" style={{ marginLeft: '20px' }}>
+        <div className="form-field" style={{ flex: '0 0 auto', width: '220px' }}>
           <label htmlFor="masterCgpa">
             {formData.masterCgpaScale === 'percentage' ? 'Percentage*' : 
              formData.masterCgpaScale === 'cgpa10' ? 'CGPA (Out of 10)*' : 'CGPA (Out of 4)*'}
