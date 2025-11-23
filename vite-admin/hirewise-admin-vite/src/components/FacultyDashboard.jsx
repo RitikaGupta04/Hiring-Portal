@@ -140,44 +140,6 @@ const FacultyDashboard = () => {
     }
   };
 
-  // Update application status: 'in_review' (Accept) or 'rejected' (Reject)
-  const updateApplicationStatus = async (nextStatus) => {
-    if (!selectedCandidate?.id) return;
-    try {
-      setUpdatingStatus(true);
-      const { error: updErr } = await supabase
-        .from('faculty_applications')
-        .update({ status: nextStatus })
-        .eq('id', selectedCandidate.id);
-      if (updErr) throw updErr;
-
-      // Close modal first
-      closeModal();
-      
-      // Immediately remove from local state if rejected, deleted, or shortlisted
-      if (nextStatus === 'rejected' || nextStatus === 'deleted' || nextStatus === 'shortlisted') {
-        setCandidates(prev => prev.filter(c => c.id !== selectedCandidate.id));
-        alert(`Application ${nextStatus} and removed from list.`);
-      } else {
-        // Update status in local state
-        setCandidates(prev => prev.map(c => 
-          c.id === selectedCandidate.id ? { ...c, status: nextStatus } : c
-        ));
-        alert('Application moved to Waiting (In Review).');
-      }
-      
-      // Force a full refetch to ensure sync
-      setTimeout(() => {
-        fetchCandidates();
-      }, 500);
-    } catch (e) {
-      console.error('Status update failed:', e);
-      alert(e.message || 'Failed to update status');
-    } finally {
-      setUpdatingStatus(false);
-    }
-  };
-
   const filteredCandidates = candidates;
 
   if (loading) {
@@ -601,20 +563,6 @@ const FacultyDashboard = () => {
                       }`}>
                         {selectedCandidate.status === 'in_review' ? 'in_review' : selectedCandidate.status || 'in_review'}
                       </span>
-                      <button
-                        onClick={() => updateApplicationStatus('shortlisted')}
-                        className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-xs"
-                        disabled={updatingStatus}
-                      >
-                        Approve
-                      </button>
-                      <button
-                        onClick={() => updateApplicationStatus('rejected')}
-                        className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-xs"
-                        disabled={updatingStatus}
-                      >
-                        Reject
-                      </button>
                     </div>
                   </div>
                 </div>
