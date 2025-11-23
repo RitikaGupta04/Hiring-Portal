@@ -16,6 +16,7 @@ const AllCandidates = () => {
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [candidateToAssign, setCandidateToAssign] = useState(null);
   const [selectedFaculty, setSelectedFaculty] = useState([]);
+  const [assignments, setAssignments] = useState({});
 
   const departments = ['All', 'law', 'liberal', 'engineering', 'management'];
   
@@ -264,16 +265,31 @@ const AllCandidates = () => {
                     >
                       View Details
                     </button>
-                    <button
-                      onClick={() => {
-                        setCandidateToAssign(candidate);
-                        setShowAssignModal(true);
-                        setSelectedFaculty([]);
-                      }}
-                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
-                    >
-                      Assign Faculty
-                    </button>
+                    {assignments[candidate.id] ? (
+                      <button
+                        onClick={() => {
+                          const assignedFaculty = facultyMembers
+                            .filter(f => assignments[candidate.id].includes(f.id))
+                            .map(f => f.name)
+                            .join(', ');
+                          alert(`This candidate is assigned to: ${assignedFaculty}`);
+                        }}
+                        className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+                      >
+                        Assigned
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setCandidateToAssign(candidate);
+                          setShowAssignModal(true);
+                          setSelectedFaculty([]);
+                        }}
+                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+                      >
+                        Assign Faculty
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -346,6 +362,13 @@ const AllCandidates = () => {
                       .filter(f => selectedFaculty.includes(f.id))
                       .map(f => f.name)
                       .join(', ');
+                    
+                    // Save assignment
+                    setAssignments({
+                      ...assignments,
+                      [candidateToAssign.id]: selectedFaculty
+                    });
+                    
                     alert(`Assigned ${candidateToAssign.first_name} ${candidateToAssign.last_name} to: ${selectedNames}`);
                     setShowAssignModal(false);
                     setCandidateToAssign(null);
