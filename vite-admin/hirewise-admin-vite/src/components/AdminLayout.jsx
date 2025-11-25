@@ -9,6 +9,7 @@ import SettingsPage from './Settings';
 const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeItem, setActiveItem] = useState('');
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -26,6 +27,11 @@ const AdminLayout = () => {
     { id: 'notification', name: 'Notifications', icon: Bell, path: '/admin/notifications' },
     { id: 'settings', name: 'Settings', icon: Settings, path: '/admin/settings' },
   ];
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/admin/login');
+  };
 
   useEffect(() => {
     const currentPath = location.pathname;
@@ -127,15 +133,57 @@ const AdminLayout = () => {
                 <Bell className="h-6 w-6 text-gray-600 hover:text-gray-900 transition-colors duration-200" />
                 <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center text-white text-xs">3</span>
               </div>
-              <div 
-                className="h-8 w-8 bg-gray-800 rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
-                onClick={() => {
-                  localStorage.clear();
-                  navigate('/admin/login');
-                }}
-                title="Logout"
-              >
-                <span className="text-white font-medium text-sm">A</span>
+              
+              {/* User Menu Dropdown */}
+              <div className="relative">
+                <div 
+                  className="h-8 w-8 bg-gray-800 rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                >
+                  <span className="text-white font-medium text-sm">A</span>
+                </div>
+                
+                {/* Dropdown Menu */}
+                {showUserMenu && (
+                  <>
+                    {/* Backdrop to close menu */}
+                    <div 
+                      className="fixed inset-0 z-10" 
+                      onClick={() => setShowUserMenu(false)}
+                    ></div>
+                    
+                    {/* Menu */}
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-20">
+                      {/* User Info */}
+                      <div className="px-4 py-3 border-b border-gray-200">
+                        <p className="text-sm font-semibold text-gray-900">Administrator</p>
+                        <p className="text-xs text-gray-600 mt-1">admin@bmu.edu.in</p>
+                      </div>
+                      
+                      {/* Menu Items */}
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          navigate('/admin/settings');
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                      >
+                        <Settings className="h-4 w-4 mr-2" />
+                        Settings
+                      </button>
+                      
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center border-t border-gray-200 mt-1"
+                      >
+                        <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Logout
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
