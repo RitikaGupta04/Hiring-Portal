@@ -7,6 +7,8 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 const FacultyDashboard = () => {
   const location = useLocation();
   const [selectedCandidate, setSelectedCandidate] = useState(null);
+  const [evaluationCandidate, setEvaluationCandidate] = useState(null);
+  const [evaluationScores, setEvaluationScores] = useState({});
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -111,6 +113,72 @@ const FacultyDashboard = () => {
 
   const closeModal = () => {
     setSelectedCandidate(null);
+  };
+
+  const handleEvaluate = (candidate) => {
+    setEvaluationCandidate(candidate);
+    setEvaluationScores({
+      teachingCompetence: '',
+      researchPotential: '',
+      industryExperience: '',
+      communicationSkills: '',
+      subjectKnowledge: '',
+      overallSuitability: '',
+      remarks: ''
+    });
+  };
+
+  const closeEvaluationModal = () => {
+    setEvaluationCandidate(null);
+    setEvaluationScores({});
+  };
+
+  const handleScoreChange = (field, value) => {
+    setEvaluationScores(prev => ({ ...prev, [field]: value }));
+  };
+
+  const submitEvaluation = async () => {
+    if (!evaluationCandidate?.id) return;
+    
+    // Validate all scores are filled
+    const requiredFields = ['teachingCompetence', 'researchPotential', 'industryExperience', 'communicationSkills', 'subjectKnowledge', 'overallSuitability'];
+    const missingFields = requiredFields.filter(field => !evaluationScores[field]);
+    
+    if (missingFields.length > 0) {
+      alert('Please fill in all evaluation scores before submitting.');
+      return;
+    }
+    
+    try {
+      setUpdatingStatus(true);
+      
+      // Save evaluation to database
+      const { error: evalErr } = await supabase
+        .from('faculty_evaluations')
+        .insert({
+          application_id: evaluationCandidate.id,
+          faculty_id: facultyInfo.id,
+          faculty_name: facultyInfo.name,
+          teaching_competence: parseInt(evaluationScores.teachingCompetence),
+          research_potential: parseInt(evaluationScores.researchPotential),
+          industry_experience: parseInt(evaluationScores.industryExperience),
+          communication_skills: parseInt(evaluationScores.communicationSkills),
+          subject_knowledge: parseInt(evaluationScores.subjectKnowledge),
+          overall_suitability: parseInt(evaluationScores.overallSuitability),
+          remarks: evaluationScores.remarks || null,
+          evaluated_at: new Date().toISOString()
+        });
+      
+      if (evalErr) throw evalErr;
+      
+      alert('Evaluation submitted successfully!');
+      closeEvaluationModal();
+    } catch (error) {
+      console.error('Error submitting evaluation:', error);
+      alert('Failed to submit evaluation. Please try again.');
+    } finally {
+      setUpdatingStatus(false);
+    }
   };
 
   // Update application status: 'shortlisted' or 'rejected'
@@ -258,12 +326,18 @@ const FacultyDashboard = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex-shrink-0">
+                  <div className="flex-shrink-0 flex space-x-3">
                     <button
                       onClick={() => handleViewDetails(candidate)}
                       className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors font-medium shadow-md hover:shadow-lg"
                     >
                       View Details
+                    </button>
+                    <button
+                      onClick={() => handleEvaluate(candidate)}
+                      className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors font-medium shadow-md hover:shadow-lg"
+                    >
+                      Evaluate
                     </button>
                   </div>
                 </div>
@@ -654,7 +728,164 @@ const FacultyDashboard = () => {
           </div>
         </div>
       )}
-    </>
+
+      {/* Evaluation Modal */}
+      {evaluationCandidate && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[95vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-green-50 to-emerald-50">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Faculty Evaluation</h2>
+                <p className="text-sm text-gray-600 mt-1">Evaluate candidate performance</p>
+              </div>
+              <button
+                onClick={closeEvaluationModal}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Auto-filled Information */}
+            <div className="p-6 bg-blue-50 border-b">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 block mb-1">Name of the Applicant</label>
+                  <p className="text-base font-medium text-gray-900">
+                    {evaluationCandidate.first_name} {evaluationCandidate.middle_name} {evaluationCandidate.last_name}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 block mb-1">Subject Area</label>
+                  <p className="text-base font-medium text-gray-900">{evaluationCandidate.department || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 block mb-1">Post Applied For</label>
+                  <p className="text-base font-medium text-gray-900">{evaluationCandidate.position || 'N/A'}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Evaluation Form */}
+            <div className="p-6 space-y-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Evaluation Parameters (Rate out of 10)</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Teaching Competence*</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="10"
+                    value={evaluationScores.teachingCompetence}
+                    onChange={(e) => handleScoreChange('teachingCompetence', e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Enter score 0-10"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Research Potential*</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="10"
+                    value={evaluationScores.researchPotential}
+                    onChange={(e) => handleScoreChange('researchPotential', e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Enter score 0-10"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Industry Experience*</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="10"
+                    value={evaluationScores.industryExperience}
+                    onChange={(e) => handleScoreChange('industryExperience', e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Enter score 0-10"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Communication Skills*</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="10"
+                    value={evaluationScores.communicationSkills}
+                    onChange={(e) => handleScoreChange('communicationSkills', e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Enter score 0-10"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Subject Knowledge*</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="10"
+                    value={evaluationScores.subjectKnowledge}
+                    onChange={(e) => handleScoreChange('subjectKnowledge', e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Enter score 0-10"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Overall Suitability*</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="10"
+                    value={evaluationScores.overallSuitability}
+                    onChange={(e) => handleScoreChange('overallSuitability', e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Enter score 0-10"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Remarks/Comments</label>
+                <textarea
+                  value={evaluationScores.remarks}
+                  onChange={(e) => handleScoreChange('remarks', e.target.value)}
+                  rows="4"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Enter any additional remarks or observations..."
+                />
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex justify-end gap-3 p-4 border-t bg-gray-50">
+              <button
+                onClick={closeEvaluationModal}
+                className="px-5 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-medium"
+                disabled={updatingStatus}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitEvaluation}
+                disabled={updatingStatus}
+                className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {updatingStatus ? 'Submitting...' : 'Submit Evaluation'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>;
   );
 };
 
