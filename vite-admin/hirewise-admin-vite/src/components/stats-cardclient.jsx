@@ -146,6 +146,44 @@ export default function StatsCardsClient({ selectedView = 'teaching' }) {
     }
   }
 
+  const deleteAllShortlisted = async () => {
+    if (!confirm('Are you sure you want to delete ALL shortlisted applications? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      setPanelLoading(true);
+      
+      // Build query to delete shortlisted applications based on current view
+      let query = supabase.from('faculty_applications').delete().eq('status', 'shortlisted');
+      
+      // Filter by teaching/non-teaching
+      if (selectedView === 'teaching') {
+        query = query.or('position.ilike.%professor%,position.eq.teaching');
+      } else {
+        query = query.not('position', 'ilike', '%professor%').neq('position', 'teaching');
+      }
+
+      const { error } = await query;
+      
+      if (error) throw error;
+
+      alert('All shortlisted applications have been deleted successfully!');
+      
+      // Refresh the list and stats
+      setPanelItems([]);
+      setActivePanel(null);
+      
+      // Trigger a re-fetch of stats
+      window.location.reload();
+    } catch (err) {
+      alert(`Error deleting applications: ${err.message}`);
+      console.error('Delete error:', err);
+    } finally {
+      setPanelLoading(false);
+    }
+  }
+
   const viewEvaluation = async (applicationId) => {
     setEvaluationLoading(true)
     setSelectedEvaluation(applicationId)
@@ -276,6 +314,16 @@ export default function StatsCardsClient({ selectedView = 'teaching' }) {
                 {activePanel === 'rejected' && 'Applications • Rejected'}
               </h3>
               <div className="flex items-center gap-2">
+                {activePanel === 'shortlisted' && panelItems.length > 0 && (
+                  <button
+                    onClick={deleteAllShortlisted}
+                    className="flex items-center gap-1 px-3 py-1.5 text-xs text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors"
+                    title="Delete all shortlisted applications"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Clear All
+                  </button>
+                )}
                 {activePanel === 'rejected' && panelItems.length > 0 && (
                   <button
                     onClick={deleteAllRejected}
