@@ -26,7 +26,7 @@ const AllCandidates = () => {
   
   const facultyMembers = [
     { id: 1, name: 'Dr. Kiran Sharma', email: 'kiran.sharma@bmu.edu.in' },
-    { id: 2, name: 'Dr. Ziya Khan', email: 'ziya.khan@bmu.edu.in' }
+    { id: 2, name: 'Dr. Ziya Uddin', email: 'ziya.uddin@bmu.edu.in' }
   ];
 
   const fetchCandidates = async () => {
