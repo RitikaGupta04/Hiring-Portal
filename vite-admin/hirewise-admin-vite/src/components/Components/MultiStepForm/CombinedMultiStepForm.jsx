@@ -296,6 +296,7 @@ const PersonalInformation = ({ formData, setFormData, onNext, onPrevious, onSave
             <option value="">Select</option>
             <option value="Mr.">Mr.</option>
             <option value="Ms.">Ms.</option>
+            <option value="Mrs.">Mrs.</option>
             <option value="Dr.">Dr.</option>
           </select>
           {errors.title && <span className="error">{errors.title}</span>}
@@ -759,7 +760,7 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
         </div>
       </div>
       <div className="form-fields-row" style={{ marginTop: '1rem' }}>
-        <div className="form-field" style={{ flex: '0 0 auto', width: '200px' }}>
+        <div className="form-field" style={{ flex: '0 0 auto', width: '180px' }}>
           <label htmlFor="bachelorYear">Passing Year*</label>
           <input
             type="number"
@@ -772,7 +773,7 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
           />
           {errors.bachelorYear && <span className="error">{errors.bachelorYear}</span>}
         </div>
-        <div className="form-field" style={{ flex: '1', maxWidth: '350px' }}>
+        <div className="form-field" style={{ flex: '1', maxWidth: '320px' }}>
           <label htmlFor="bachelorCgpaScale">Grading Scale*</label>
           <select
             id="bachelorCgpaScale"
@@ -785,7 +786,7 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
             <option value="cgpa4">CGPA (Out of 4)</option>
           </select>
         </div>
-        <div className="form-field" style={{ flex: '0 0 auto', width: '220px' }}>
+        <div className="form-field" style={{ flex: '1', maxWidth: '280px' }}>
           <label htmlFor="bachelorCgpa">
             {formData.bachelorCgpaScale === 'percentage' ? 'Percentage*' : 
              formData.bachelorCgpaScale === 'cgpa10' ? 'CGPA (Out of 10)*' : 'CGPA (Out of 4)*'}
@@ -899,7 +900,7 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
         </div>
       </div>
       <div className="form-fields-row" style={{ marginTop: '1rem' }}>
-        <div className="form-field" style={{ flex: '0 0 auto', width: '200px' }}>
+        <div className="form-field" style={{ flex: '0 0 auto', width: '180px' }}>
           <label htmlFor="masterYear">Passing Year*</label>
           <input
             type="number"
@@ -912,7 +913,7 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
           />
           {errors.masterYear && <span className="error">{errors.masterYear}</span>}
         </div>
-        <div className="form-field" style={{ flex: '1', maxWidth: '350px' }}>
+        <div className="form-field" style={{ flex: '1', maxWidth: '320px' }}>
           <label htmlFor="masterCgpaScale">Grading Scale*</label>
           <select
             id="masterCgpaScale"
@@ -925,7 +926,7 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
             <option value="cgpa4">CGPA (Out of 4)</option>
           </select>
         </div>
-        <div className="form-field" style={{ flex: '0 0 auto', width: '220px' }}>
+        <div className="form-field" style={{ flex: '1', maxWidth: '280px' }}>
           <label htmlFor="masterCgpa">
             {formData.masterCgpaScale === 'percentage' ? 'Percentage*' : 
              formData.masterCgpaScale === 'cgpa10' ? 'CGPA (Out of 10)*' : 'CGPA (Out of 4)*'}
