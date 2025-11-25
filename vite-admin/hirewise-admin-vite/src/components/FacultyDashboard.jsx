@@ -4,6 +4,7 @@ import { candidatesApi } from '../lib/api';
 import { supabase } from '../../lib/supabase-client';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
+// Faculty Dashboard - Evaluation System
 const FacultyDashboard = () => {
   const location = useLocation();
   const [selectedCandidate, setSelectedCandidate] = useState(null);
