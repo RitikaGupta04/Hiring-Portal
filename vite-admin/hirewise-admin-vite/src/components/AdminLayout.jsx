@@ -12,6 +12,14 @@ const AdminLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Check admin authentication
+  useEffect(() => {
+    const isAdminAuth = localStorage.getItem('adminAuth');
+    if (!isAdminAuth) {
+      navigate('/admin/login', { replace: true });
+    }
+  }, [navigate]);
+
   const navigation = [
     { id: 'dashboard', name: 'Dashboard', icon: Home, path: '/admin/dashboard' },
     { id: 'allcandidates', name: 'All Candidates', icon: Users, path: '/admin/candidates' },
@@ -112,11 +120,21 @@ const AdminLayout = () => {
             </div>
             
             <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Bell className="h-6 w-6 text-gray-600 hover:text-gray-900 cursor-pointer transition-colors duration-200" />
+              <div 
+                className="relative cursor-pointer"
+                onClick={() => navigate('/admin/notifications')}
+              >
+                <Bell className="h-6 w-6 text-gray-600 hover:text-gray-900 transition-colors duration-200" />
                 <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center text-white text-xs">3</span>
               </div>
-              <div className="h-8 w-8 bg-gray-800 rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer">
+              <div 
+                className="h-8 w-8 bg-gray-800 rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                onClick={() => {
+                  localStorage.clear();
+                  navigate('/admin/login');
+                }}
+                title="Logout"
+              >
                 <span className="text-white font-medium text-sm">A</span>
               </div>
             </div>

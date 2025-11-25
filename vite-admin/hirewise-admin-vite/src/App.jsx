@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import RegistrationPage from './components/Components/RegistrationPage';
 import AdminApp from './components/AdminLayout';
+import AdminLogin from './components/AdminLogin';
 import CombinedMultiStepForm from './components/Components/MultiStepForm/CombinedMultiStepForm';
 import ProtectedRoute from './components/Components/ProtectedRoute/ProtectedRoute';
 import FacultyPage from './components/FacultyPage';
@@ -63,6 +64,9 @@ function App() {
           <Route path="/application" element={<CombinedMultiStepForm />} />
         </Route>
 
+        {/* Admin login route */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        
         {/* Admin routes */}
         <Route path="/admin/*" element={<AdminApp />} />
         
