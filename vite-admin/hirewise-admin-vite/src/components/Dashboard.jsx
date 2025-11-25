@@ -68,8 +68,8 @@ const Dashboard = () => {
     const fetchCandidates = async () => {
       try {
         setLoading(true);
-        // ⚡ OPTIMIZED: Use API client with retry & caching
-        const data = await candidatesApi.getTopRankings();
+        // ⚡ OPTIMIZED: Use API client with retry & caching, but skip cache to get fresh data
+        const data = await candidatesApi.getTopRankings({ _t: Date.now() });
         const arr = Array.isArray(data) ? data : [];
         const unique = dedupeCandidates(arr);
         setCandidates(unique);
