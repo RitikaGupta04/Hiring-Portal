@@ -81,6 +81,7 @@ const Dashboard = () => {
       }
     };
 
+    // Immediate fetch without delay
     fetchCandidates();
     
     // Refetch when window gains focus (user returns from other pages)
@@ -559,10 +560,11 @@ const getPositionFilterOptions = () => {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="7" className="py-8 text-center text-gray-500">
-                      <div className="flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500 mr-2"></div>
-                        Loading candidates...
+                    <td colSpan="7" className="py-12 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mb-4"></div>
+                        <p className="text-gray-700 font-semibold text-lg">Loading candidate data...</p>
+                        <p className="text-gray-500 text-sm mt-2">This may take a few seconds on first load</p>
                       </div>
                     </td>
                   </tr>
