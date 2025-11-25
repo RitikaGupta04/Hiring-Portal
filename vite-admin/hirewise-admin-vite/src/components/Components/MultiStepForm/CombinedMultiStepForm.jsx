@@ -758,8 +758,6 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
           />
           {errors.bachelorDegreeName && <span className="error">{errors.bachelorDegreeName}</span>}
         </div>
-      </div>
-      <div className="form-fields-row" style={{ marginTop: '1rem' }}>
         <div className="form-field" style={{ flex: '0 0 auto', width: '180px' }}>
           <label htmlFor="bachelorYear">Passing Year*</label>
           <input
@@ -773,7 +771,9 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
           />
           {errors.bachelorYear && <span className="error">{errors.bachelorYear}</span>}
         </div>
-        <div className="form-field" style={{ flex: '1', maxWidth: '320px' }}>
+      </div>
+      <div className="form-fields-row" style={{ marginTop: '1rem' }}>
+        <div className="form-field" style={{ flex: '1' }}>
           <label htmlFor="bachelorCgpaScale">Grading Scale*</label>
           <select
             id="bachelorCgpaScale"
@@ -786,7 +786,7 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
             <option value="cgpa4">CGPA (Out of 4)</option>
           </select>
         </div>
-        <div className="form-field" style={{ flex: '1', maxWidth: '280px' }}>
+        <div className="form-field" style={{ flex: '1' }}>
           <label htmlFor="bachelorCgpa">
             {formData.bachelorCgpaScale === 'percentage' ? 'Percentage*' : 
              formData.bachelorCgpaScale === 'cgpa10' ? 'CGPA (Out of 10)*' : 'CGPA (Out of 4)*'}
@@ -898,8 +898,6 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
           )}
           {errors.masterDegreeName && <span className="error">{errors.masterDegreeName}</span>}
         </div>
-      </div>
-      <div className="form-fields-row" style={{ marginTop: '1rem' }}>
         <div className="form-field" style={{ flex: '0 0 auto', width: '180px' }}>
           <label htmlFor="masterYear">Passing Year*</label>
           <input
@@ -913,7 +911,9 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
           />
           {errors.masterYear && <span className="error">{errors.masterYear}</span>}
         </div>
-        <div className="form-field" style={{ flex: '1', maxWidth: '320px' }}>
+      </div>
+      <div className="form-fields-row" style={{ marginTop: '1rem' }}>
+        <div className="form-field" style={{ flex: '1' }}>
           <label htmlFor="masterCgpaScale">Grading Scale*</label>
           <select
             id="masterCgpaScale"
@@ -926,7 +926,7 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
             <option value="cgpa4">CGPA (Out of 4)</option>
           </select>
         </div>
-        <div className="form-field" style={{ flex: '1', maxWidth: '280px' }}>
+        <div className="form-field" style={{ flex: '1' }}>
           <label htmlFor="masterCgpa">
             {formData.masterCgpaScale === 'percentage' ? 'Percentage*' : 
              formData.masterCgpaScale === 'cgpa10' ? 'CGPA (Out of 10)*' : 'CGPA (Out of 4)*'}
