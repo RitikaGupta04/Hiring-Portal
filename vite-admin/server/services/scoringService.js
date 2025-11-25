@@ -167,7 +167,8 @@ class ScoringService {
       { key: 'iiit hyderabad', altKeys: ['indian institute of information technology hyderabad'], nirf: 55, qs: null },
       { key: 'delhi university', altKeys: ['university of delhi'], nirf: 11, qs: 407 },
       { key: 'jnu', altKeys: ['jawaharlal nehru university'], nirf: 2, qs: 1220 },
-      { key: 'anna university', altKeys: [], nirf: 18, qs: 427 }
+      { key: 'anna university', altKeys: [], nirf: 18, qs: 427 },
+      { key: 'bml munjal', altKeys: ['bml munjal university'], nirf: 68, qs: null }
     ];
 
     const match = rankings.find(r => {
@@ -209,7 +210,8 @@ class ScoringService {
       { key: 'iiit hyderabad', altKeys: ['indian institute of information technology hyderabad'], nirf: 55, qs: null },
       { key: 'delhi university', altKeys: ['university of delhi'], nirf: 11, qs: 407 },
       { key: 'jnu', altKeys: ['jawaharlal nehru university'], nirf: 2, qs: 1220 },
-      { key: 'anna university', altKeys: [], nirf: 18, qs: 427 }
+      { key: 'anna university', altKeys: [], nirf: 18, qs: 427 },
+      { key: 'bml munjal', altKeys: ['bml munjal university'], nirf: 68, qs: null }
     ];
 
   const match = rankings.find(r => {
