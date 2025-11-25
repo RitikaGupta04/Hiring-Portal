@@ -45,8 +45,8 @@ const uploadToStorage = async (bucket, fileName, fileBuffer) => {
 
 const router = express.Router();
 
-// ⚡ OPTIMIZED: Get top ranked applications with caching
-router.get('/rankings/top', cache.middleware(180), async (req, res) => {
+// ⚡ OPTIMIZED: Get top ranked applications with caching (reduced to 30 seconds for faster updates)
+router.get('/rankings/top', cache.middleware(30), async (req, res) => {
   try {
     const { department = null, position = null, limit = '10' } = req.query;
     const parsedLimit = Math.min(parseInt(limit) || 10, 100); // Cap at 100
