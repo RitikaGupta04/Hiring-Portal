@@ -15,69 +15,8 @@ const Notification = () => {
 
   // Mock data for admin alerts - replace with API calls
   useEffect(() => {
-    // Simulate fetching admin alerts from backend
-    const mockAlerts = [
-      {
-        id: 1,
-        type: 'new_registration',
-        title: 'New User Registration',
-        message: 'John Doe has registered as a new candidate',
-        timestamp: new Date(Date.now() - 30 * 60 * 1000),
-        read: false,
-        priority: 'normal',
-        actionRequired: true
-      },
-      {
-        id: 2,
-        type: 'job_application',
-        title: 'New Job Application',
-        message: 'Sarah Wilson applied for Senior Developer position',
-        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-        read: false,
-        priority: 'high',
-        actionRequired: true
-      },
-      {
-        id: 3,
-        type: 'pending_approval',
-        title: 'Pending Approval Required',
-        message: '3 candidate profiles are waiting for approval',
-        timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000),
-        read: true,
-        priority: 'high',
-        actionRequired: true
-      },
-      {
-        id: 4,
-        type: 'flagged_issue',
-        title: 'Flagged Content Detected',
-        message: 'Inappropriate content reported in candidate profile #1234',
-        timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000),
-        read: false,
-        priority: 'urgent',
-        actionRequired: true
-      },
-      {
-        id: 5,
-        type: 'new_registration',
-        title: 'Bulk Registration Event',
-        message: '15 new candidates registered today during the job fair',
-        timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000),
-        read: true,
-        priority: 'normal',
-        actionRequired: false
-      },
-      {
-        id: 6,
-        type: 'system',
-        title: 'System Performance Alert',
-        message: 'Database response time increased by 15% in the last hour',
-        timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000),
-        read: false,
-        priority: 'high',
-        actionRequired: true
-      }
-    ];
+    // Empty alerts - no mock data
+    const mockAlerts = [];
     
     setAdminAlerts(mockAlerts);
     setUnreadCount(mockAlerts.filter(alert => !alert.read).length);
