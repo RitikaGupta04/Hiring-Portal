@@ -37,6 +37,12 @@ const AdminLogin = () => {
     setIsLoading(false);
   };
 
+  // Auto-fill credentials for easy access
+  const handleAutoFill = () => {
+    setEmail(ADMIN_CREDENTIALS.email);
+    setPassword(ADMIN_CREDENTIALS.password);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
@@ -47,6 +53,22 @@ const AdminLogin = () => {
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Login</h1>
           <p className="text-gray-600">Sign in to access the admin panel</p>
+        </div>
+
+        {/* Quick Access Info */}
+        <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-6">
+          <p className="text-sm font-semibold text-blue-900 mb-2">📋 Admin Credentials:</p>
+          <div className="space-y-1 text-sm text-blue-800">
+            <p><span className="font-semibold">Email:</span> admin@bmu.edu.in</p>
+            <p><span className="font-semibold">Password:</span> admin123</p>
+          </div>
+          <button
+            type="button"
+            onClick={handleAutoFill}
+            className="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors"
+          >
+            Click to Auto-Fill Credentials
+          </button>
         </div>
 
         {/* Form */}
@@ -115,16 +137,10 @@ const AdminLogin = () => {
                 Signing in...
               </span>
             ) : (
-              'Sign In'
-            )}
+            'Sign In'
+          )}
           </button>
         </form>
-
-        {/* Footer */}
-        <div className="mt-6 text-center text-sm text-gray-600">
-          <p>Default credentials:</p>
-          <p className="font-mono text-xs mt-1">admin@bmu.edu.in / admin123</p>
-        </div>
       </div>
     </div>
   );
