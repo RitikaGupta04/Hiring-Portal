@@ -769,6 +769,12 @@ const getPositionFilterOptions = () => {
                               {selectedCandidate.phd_specialization && (
                                 <p className="text-xs text-gray-600 mt-1">Specialization: {selectedCandidate.phd_specialization}</p>
                               )}
+                              {(selectedCandidate.phd_cgpa || selectedCandidate.phd_percentage) && (
+                                <p className="text-xs text-gray-600 mt-1">
+                                  {selectedCandidate.phd_cgpa && `CGPA: ${selectedCandidate.phd_cgpa}${selectedCandidate.phd_cgpa_scale ? ` (Out of ${selectedCandidate.phd_cgpa_scale})` : ''}`}
+                                  {selectedCandidate.phd_percentage && `${selectedCandidate.phd_cgpa ? ' | ' : ''}Percentage: ${selectedCandidate.phd_percentage}%`}
+                                </p>
+                              )}
                             </div>
                           )}
                           
@@ -780,6 +786,12 @@ const getPositionFilterOptions = () => {
                               <p className="text-xs text-gray-600">
                                 {selectedCandidate.master_degree_name || 'N/A'} | Year: {selectedCandidate.master_year || 'N/A'}
                               </p>
+                              {(selectedCandidate.master_cgpa || selectedCandidate.master_percentage) && (
+                                <p className="text-xs text-gray-600 mt-1">
+                                  {selectedCandidate.master_cgpa && `CGPA: ${selectedCandidate.master_cgpa}${selectedCandidate.master_cgpa_scale ? ` (Out of ${selectedCandidate.master_cgpa_scale})` : ''}`}
+                                  {selectedCandidate.master_percentage && `${selectedCandidate.master_cgpa ? ' | ' : ''}Percentage: ${selectedCandidate.master_percentage}%`}
+                                </p>
+                              )}
                             </div>
                           )}
                           
@@ -791,6 +803,12 @@ const getPositionFilterOptions = () => {
                               <p className="text-xs text-gray-600">
                                 {selectedCandidate.bachelor_degree_name || 'N/A'} | Year: {selectedCandidate.bachelor_year || 'N/A'}
                               </p>
+                              {(selectedCandidate.bachelor_cgpa || selectedCandidate.bachelor_percentage) && (
+                                <p className="text-xs text-gray-600 mt-1">
+                                  {selectedCandidate.bachelor_cgpa && `CGPA: ${selectedCandidate.bachelor_cgpa}${selectedCandidate.bachelor_cgpa_scale ? ` (Out of ${selectedCandidate.bachelor_cgpa_scale})` : ''}`}
+                                  {selectedCandidate.bachelor_percentage && `${selectedCandidate.bachelor_cgpa ? ' | ' : ''}Percentage: ${selectedCandidate.bachelor_percentage}%`}
+                                </p>
+                              )}
                             </div>
                           )}
                           
