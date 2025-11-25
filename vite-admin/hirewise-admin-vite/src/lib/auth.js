@@ -3,8 +3,8 @@ import { API_BASE } from './config';
 
 // Register a new user with retry logic
 export async function registerUser({ name, email, phone, password }, retryCount = 0) {
-  const MAX_RETRIES = 1; // Reduce retries for faster feedback
-  const TIMEOUT = 20000; // 20 seconds for faster response
+  const MAX_RETRIES = 2; // Allow more retries for cold starts
+  const TIMEOUT = 45000; // 45 seconds to handle backend cold starts
   
   try {
     const controller = new AbortController();
@@ -29,12 +29,13 @@ export async function registerUser({ name, email, phone, password }, retryCount 
   } catch (err) {
     // Retry on network errors or timeouts
     if ((err.name === 'AbortError' || err.message.includes('fetch')) && retryCount < MAX_RETRIES) {
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s before retry
+      console.log(`Registration attempt ${retryCount + 1} failed, retrying...`);
+      await new Promise(resolve => setTimeout(resolve, 3000)); // Wait 3s before retry
       return registerUser({ name, email, phone, password }, retryCount + 1);
     }
     
     if (err.name === 'AbortError') {
-      throw new Error('Connection timeout. Please check your internet and try again.');
+      throw new Error('Registration is taking longer than expected. The server may be starting up. Please try again in a moment.');
     }
     throw err;
   }
