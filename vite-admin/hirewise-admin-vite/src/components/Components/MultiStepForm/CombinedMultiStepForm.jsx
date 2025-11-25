@@ -255,6 +255,7 @@ const PersonalInformation = ({ formData, setFormData, onNext, onPrevious, onSave
     if (!formData.phone) newErrors.phone = 'Phone number is required';
     else if (!/^\d{10}$/.test(formData.phone)) newErrors.phone = 'Phone number must be 10 digits';
     if (!formData.gender) newErrors.gender = 'Gender is required';
+    if (!formData.speciallyAbled) newErrors.speciallyAbled = 'Please select an option';
     if (!formData.category) newErrors.category = 'Category is required';
     if (!formData.dateOfBirth) newErrors.dateOfBirth = 'Date of Birth is required';
     else {
@@ -404,6 +405,34 @@ const PersonalInformation = ({ formData, setFormData, onNext, onPrevious, onSave
           </div>
           {errors.gender && <span className="error">{errors.gender}</span>}
         </div>
+        <div className="form-field">
+          <label>Specially Abled*</label>
+          <div className="radio-group">
+            <label>
+              <input
+                type="radio"
+                name="speciallyAbled"
+                value="Yes"
+                checked={formData.speciallyAbled === 'Yes'}
+                onChange={(e) => setFormData({ ...formData, speciallyAbled: e.target.value })}
+              />
+              Yes
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="speciallyAbled"
+                value="No"
+                checked={formData.speciallyAbled === 'No'}
+                onChange={(e) => setFormData({ ...formData, speciallyAbled: e.target.value })}
+              />
+              No
+            </label>
+          </div>
+          {errors.speciallyAbled && <span className="error">{errors.speciallyAbled}</span>}
+        </div>
+      </div>
+      <div className="form-fields-row">
         <div className="form-field">
           <label htmlFor="category">Category*</label>
           <select
