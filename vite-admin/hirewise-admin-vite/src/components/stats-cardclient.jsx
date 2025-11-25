@@ -373,7 +373,11 @@ export default function StatsCardsClient({ selectedView = 'teaching' }) {
               {/* Faculty Info */}
               <div className="mb-6 p-4 bg-blue-50 rounded-lg">
                 <p className="text-sm text-gray-600">Evaluated by</p>
-                <p className="text-lg font-semibold text-gray-800">{evaluationData.faculty_name}</p>
+                <p className="text-lg font-semibold text-gray-800">
+                  {evaluationData.faculty_name.startsWith('Dr.') 
+                    ? evaluationData.faculty_name 
+                    : `Dr. ${evaluationData.faculty_name}`}
+                </p>
                 <p className="text-xs text-gray-500 mt-1">
                   {new Date(evaluationData.evaluated_at).toLocaleString('en-US', {
                     dateStyle: 'medium',
