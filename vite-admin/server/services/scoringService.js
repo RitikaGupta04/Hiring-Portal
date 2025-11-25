@@ -221,7 +221,7 @@ class ScoringService {
   if (!match) return { nirf10: null, qs10: null };
 
     const rankToScore = (rank, maxRank) => {
-      if (!rank || rank <= 0) return 0;
+      if (!rank || rank <= 0) return null;
       const clamped = Math.min(rank, maxRank);
       return Math.max(0, (maxRank - clamped) / maxRank) * 100; // 0..100
     };
@@ -230,8 +230,8 @@ class ScoringService {
     const qs100 = rankToScore(match.qs, 1500);
 
     // Convert to 0..10 scale and round to one decimal for display
-    const nirf10 = Math.round((nirf100 / 10) * 10) / 10;
-    const qs10 = Math.round((qs100 / 10) * 10) / 10;
+    const nirf10 = nirf100 !== null ? Math.round((nirf100 / 10) * 10) / 10 : null;
+    const qs10 = qs100 !== null ? Math.round((qs100 / 10) * 10) / 10 : null;
     return { nirf10, qs10 };
   }
 
