@@ -500,17 +500,74 @@ const AllCandidates = () => {
                   {/* Education */}
                   <div className="bg-white border rounded-lg p-4 shadow-sm">
                     <h3 className="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Education</h3>
-                    <div className="bg-indigo-50 rounded p-3">
-                      <p className="text-xs font-semibold text-indigo-600 uppercase">Highest Qualification</p>
-                      <p className="text-sm font-medium text-gray-900">
-                        {selectedCandidate.highest_degree || 'Not specified'}
-                      </p>
-                      {selectedCandidate.university && (
-                        <p className="text-xs text-gray-600">{selectedCandidate.university}</p>
+                    <div className="space-y-4">
+                      {/* PhD */}
+                      {selectedCandidate.phd_status && selectedCandidate.phd_status !== 'Not done' && (
+                        <div className="border-l-4 border-indigo-500 pl-4">
+                          <p className="text-xs font-semibold text-indigo-600 uppercase">PhD</p>
+                          <p className="text-sm font-medium text-gray-900">{selectedCandidate.phd_institute || selectedCandidate.institution || 'N/A'}</p>
+                          <p className="text-xs text-gray-600">
+                            {selectedCandidate.phd_degree_name || 'N/A'} | Year: {selectedCandidate.phd_year || 'N/A'}
+                          </p>
+                          {selectedCandidate.phd_specialization && (
+                            <p className="text-xs text-gray-600 mt-1">Specialization: {selectedCandidate.phd_specialization}</p>
+                          )}
+                          {(selectedCandidate.phd_cgpa || selectedCandidate.phd_percentage) && (
+                            <p className="text-xs text-gray-600 mt-1">
+                              {selectedCandidate.phd_cgpa && `CGPA: ${selectedCandidate.phd_cgpa}${selectedCandidate.phd_cgpa_scale ? ` (Out of ${selectedCandidate.phd_cgpa_scale})` : ''}`}
+                              {selectedCandidate.phd_percentage && `${selectedCandidate.phd_cgpa ? ' | ' : ''}Percentage: ${selectedCandidate.phd_percentage}%`}
+                            </p>
+                          )}
+                        </div>
                       )}
-                      {selectedCandidate.graduation_year && (
-                        <p className="text-xs text-gray-600">Graduated: {selectedCandidate.graduation_year}</p>
+                      
+                      {/* Master's */}
+                      {selectedCandidate.master_institute && (
+                        <div className="border-l-4 border-blue-500 pl-4">
+                          <p className="text-xs font-semibold text-blue-600 uppercase">Master's Degree</p>
+                          <p className="text-sm font-medium text-gray-900">{selectedCandidate.master_institute}</p>
+                          <p className="text-xs text-gray-600">
+                            {selectedCandidate.master_degree_name || 'N/A'} | Year: {selectedCandidate.master_year || 'N/A'}
+                          </p>
+                          {(selectedCandidate.master_cgpa || selectedCandidate.master_percentage) && (
+                            <p className="text-xs text-gray-600 mt-1">
+                              {selectedCandidate.master_cgpa && `CGPA: ${selectedCandidate.master_cgpa}${selectedCandidate.master_cgpa_scale ? ` (Out of ${selectedCandidate.master_cgpa_scale})` : ''}`}
+                              {selectedCandidate.master_percentage && `${selectedCandidate.master_cgpa ? ' | ' : ''}Percentage: ${selectedCandidate.master_percentage}%`}
+                            </p>
+                          )}
+                        </div>
                       )}
+                      
+                      {/* Bachelor's */}
+                      {selectedCandidate.bachelor_institute && (
+                        <div className="border-l-4 border-green-500 pl-4">
+                          <p className="text-xs font-semibold text-green-600 uppercase">Bachelor's Degree</p>
+                          <p className="text-sm font-medium text-gray-900">{selectedCandidate.bachelor_institute}</p>
+                          <p className="text-xs text-gray-600">
+                            {selectedCandidate.bachelor_degree_name || 'N/A'} | Year: {selectedCandidate.bachelor_year || 'N/A'}
+                          </p>
+                          {(selectedCandidate.bachelor_cgpa || selectedCandidate.bachelor_percentage) && (
+                            <p className="text-xs text-gray-600 mt-1">
+                              {selectedCandidate.bachelor_cgpa && `CGPA: ${selectedCandidate.bachelor_cgpa}${selectedCandidate.bachelor_cgpa_scale ? ` (Out of ${selectedCandidate.bachelor_cgpa_scale})` : ''}`}
+                              {selectedCandidate.bachelor_percentage && `${selectedCandidate.bachelor_cgpa ? ' | ' : ''}Percentage: ${selectedCandidate.bachelor_percentage}%`}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                      
+                      {/* Highest Qualification Summary */}
+                      <div className="bg-gray-50 rounded p-3 mt-2">
+                        <p className="text-xs font-semibold text-gray-500 uppercase">Highest Qualification</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {selectedCandidate.highest_degree || 'Not specified'}
+                        </p>
+                        {selectedCandidate.university && (
+                          <p className="text-xs text-gray-600">{selectedCandidate.university}</p>
+                        )}
+                        {selectedCandidate.graduation_year && (
+                          <p className="text-xs text-gray-600">Graduated: {selectedCandidate.graduation_year}</p>
+                        )}
+                      </div>
                     </div>
                   </div>
 
