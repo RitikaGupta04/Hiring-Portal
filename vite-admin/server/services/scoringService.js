@@ -157,20 +157,23 @@ class ScoringService {
   calculateUniversityRankingBoost(uniLower) {
     // Minimal in-memory dataset (extend or move to DB as needed)
     const rankings = [
-      { key: 'iisc', nirf: 1, qs: 225 },
-      { key: 'iit bombay', nirf: 3, qs: 149 },
-      { key: 'iit delhi', nirf: 2, qs: 197 },
-      { key: 'iit madras', nirf: 1, qs: 227 },
-      { key: 'iit kanpur', nirf: 4, qs: 263 },
-      { key: 'iit kharagpur', nirf: 6, qs: 271 },
-      { key: 'iiser pune', nirf: 24, qs: null },
-      { key: 'iiit hyderabad', nirf: 55, qs: null },
-      { key: 'delhi university', nirf: 11, qs: 407 },
-      { key: 'jnu', nirf: 2, qs: 1220 },
-      { key: 'anna university', nirf: 18, qs: 427 }
+      { key: 'iisc', altKeys: ['indian institute of science'], nirf: 1, qs: 225 },
+      { key: 'iit bombay', altKeys: ['indian institute of technology bombay'], nirf: 3, qs: 149 },
+      { key: 'iit delhi', altKeys: ['indian institute of technology delhi'], nirf: 2, qs: 197 },
+      { key: 'iit madras', altKeys: ['indian institute of technology madras'], nirf: 1, qs: 227 },
+      { key: 'iit kanpur', altKeys: ['indian institute of technology kanpur'], nirf: 4, qs: 263 },
+      { key: 'iit kharagpur', altKeys: ['indian institute of technology kharagpur'], nirf: 6, qs: 271 },
+      { key: 'iiser pune', altKeys: ['indian institute of science education and research pune'], nirf: 24, qs: null },
+      { key: 'iiit hyderabad', altKeys: ['indian institute of information technology hyderabad'], nirf: 55, qs: null },
+      { key: 'delhi university', altKeys: ['university of delhi'], nirf: 11, qs: 407 },
+      { key: 'jnu', altKeys: ['jawaharlal nehru university'], nirf: 2, qs: 1220 },
+      { key: 'anna university', altKeys: [], nirf: 18, qs: 427 }
     ];
 
-    const match = rankings.find(r => uniLower.includes(r.key));
+    const match = rankings.find(r => {
+      if (uniLower.includes(r.key)) return true;
+      return r.altKeys.some(alt => uniLower.includes(alt));
+    });
     if (!match) return 0;
 
     // Convert ranks to scores (smaller rank => larger score)
@@ -196,20 +199,23 @@ class ScoringService {
     if (!uniLower) return { nirf10: null, qs10: null };
 
     const rankings = [
-      { key: 'iisc', nirf: 1, qs: 225 },
-      { key: 'iit bombay', nirf: 3, qs: 149 },
-      { key: 'iit delhi', nirf: 2, qs: 197 },
-      { key: 'iit madras', nirf: 1, qs: 227 },
-      { key: 'iit kanpur', nirf: 4, qs: 263 },
-      { key: 'iit kharagpur', nirf: 6, qs: 271 },
-      { key: 'iiser pune', nirf: 24, qs: null },
-      { key: 'iiit hyderabad', nirf: 55, qs: null },
-      { key: 'delhi university', nirf: 11, qs: 407 },
-      { key: 'jnu', nirf: 2, qs: 1220 },
-      { key: 'anna university', nirf: 18, qs: 427 }
+      { key: 'iisc', altKeys: ['indian institute of science'], nirf: 1, qs: 225 },
+      { key: 'iit bombay', altKeys: ['indian institute of technology bombay'], nirf: 3, qs: 149 },
+      { key: 'iit delhi', altKeys: ['indian institute of technology delhi'], nirf: 2, qs: 197 },
+      { key: 'iit madras', altKeys: ['indian institute of technology madras'], nirf: 1, qs: 227 },
+      { key: 'iit kanpur', altKeys: ['indian institute of technology kanpur'], nirf: 4, qs: 263 },
+      { key: 'iit kharagpur', altKeys: ['indian institute of technology kharagpur'], nirf: 6, qs: 271 },
+      { key: 'iiser pune', altKeys: ['indian institute of science education and research pune'], nirf: 24, qs: null },
+      { key: 'iiit hyderabad', altKeys: ['indian institute of information technology hyderabad'], nirf: 55, qs: null },
+      { key: 'delhi university', altKeys: ['university of delhi'], nirf: 11, qs: 407 },
+      { key: 'jnu', altKeys: ['jawaharlal nehru university'], nirf: 2, qs: 1220 },
+      { key: 'anna university', altKeys: [], nirf: 18, qs: 427 }
     ];
 
-  const match = rankings.find(r => uniLower.includes(r.key));
+  const match = rankings.find(r => {
+    if (uniLower.includes(r.key)) return true;
+    return r.altKeys.some(alt => uniLower.includes(alt));
+  });
   if (!match) return { nirf10: null, qs10: null };
 
     const rankToScore = (rank, maxRank) => {
