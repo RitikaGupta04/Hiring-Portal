@@ -666,7 +666,7 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
         Bachelor's Degree
       </h3>
       <div className="degree-fields-row">
-        <div className="form-field">
+        <div className="form-field" style={{ flex: '1' }}>
           <label htmlFor="bachelorInstitute">Institution/University*</label>
           <select
             id="bachelorInstitute"
@@ -691,7 +691,7 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
           )}
           {errors.bachelorInstitute && <span className="error">{errors.bachelorInstitute}</span>}
         </div>
-        <div className="form-field">
+        <div className="form-field" style={{ flex: '1' }}>
           <label htmlFor="bachelorDegreeName">Degree Name*</label>
           <select
             id="bachelorDegreeName"
@@ -757,7 +757,9 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
           />
           {errors.bachelorDegreeName && <span className="error">{errors.bachelorDegreeName}</span>}
         </div>
-        <div className="form-field">
+      </div>
+      <div className="form-fields-row" style={{ marginTop: '1rem' }}>
+        <div className="form-field" style={{ flex: '0 0 auto', width: '200px' }}>
           <label htmlFor="bachelorYear">Passing Year*</label>
           <input
             type="number"
@@ -767,13 +769,10 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
             min={formData.dateOfBirth ? new Date(formData.dateOfBirth).getFullYear() + 18 : 1950}
             max={new Date().getFullYear()}
             onChange={handleInputChange}
-            style={{ width: '150px', maxWidth: '150px' }}
           />
           {errors.bachelorYear && <span className="error">{errors.bachelorYear}</span>}
         </div>
-      </div>
-      <div className="form-fields-row">
-        <div className="form-field" style={{ flex: '0 0 auto', width: '300px' }}>
+        <div className="form-field" style={{ flex: '1', maxWidth: '350px' }}>
           <label htmlFor="bachelorCgpaScale">Grading Scale*</label>
           <select
             id="bachelorCgpaScale"
@@ -803,7 +802,6 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
             step="0.01"
             placeholder={formData.bachelorCgpaScale === 'percentage' ? 'Enter 0-100' : 
                         formData.bachelorCgpaScale === 'cgpa10' ? 'Enter 0-10' : 'Enter 0-4'}
-            style={{ width: '200px !important', minWidth: '200px', maxWidth: '200px' }}
           />
           {errors.bachelorCgpa && <span className="error">{errors.bachelorCgpa}</span>}
         </div>
@@ -821,7 +819,7 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
         Master's Degree
       </h3>
       <div className="degree-fields-row">
-        <div className="form-field">
+        <div className="form-field" style={{ flex: '1' }}>
           <label htmlFor="masterInstitute">Institution/University*</label>
           <select
             id="masterInstitute"
@@ -846,7 +844,7 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
           )}
           {errors.masterInstitute && <span className="error">{errors.masterInstitute}</span>}
         </div>
-        <div className="form-field">
+        <div className="form-field" style={{ flex: '1' }}>
           <label htmlFor="masterDegreeName">Degree Name*</label>
           <select
             id="masterDegreeName"
@@ -899,7 +897,9 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
           )}
           {errors.masterDegreeName && <span className="error">{errors.masterDegreeName}</span>}
         </div>
-        <div className="form-field">
+      </div>
+      <div className="form-fields-row" style={{ marginTop: '1rem' }}>
+        <div className="form-field" style={{ flex: '0 0 auto', width: '200px' }}>
           <label htmlFor="masterYear">Passing Year*</label>
           <input
             type="number"
@@ -909,13 +909,10 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
             min={formData.bachelorYear || (formData.dateOfBirth ? new Date(formData.dateOfBirth).getFullYear() + 18 : 1950)}
             max={new Date().getFullYear()}
             onChange={handleInputChange}
-            style={{ width: '150px', maxWidth: '150px' }}
           />
           {errors.masterYear && <span className="error">{errors.masterYear}</span>}
         </div>
-      </div>
-      <div className="form-fields-row">
-        <div className="form-field" style={{ flex: '0 0 auto', width: '300px' }}>
+        <div className="form-field" style={{ flex: '1', maxWidth: '350px' }}>
           <label htmlFor="masterCgpaScale">Grading Scale*</label>
           <select
             id="masterCgpaScale"
@@ -945,7 +942,6 @@ const EducationDetails = ({ formData, setFormData, onNext, onPrevious, onSaveExi
             step="0.01"
             placeholder={formData.masterCgpaScale === 'percentage' ? 'Enter 0-100' : 
                         formData.masterCgpaScale === 'cgpa10' ? 'Enter 0-10' : 'Enter 0-4'}
-            style={{ width: '200px !important', minWidth: '200px', maxWidth: '200px' }}
           />
           {errors.masterCgpa && <span className="error">{errors.masterCgpa}</span>}
         </div>
