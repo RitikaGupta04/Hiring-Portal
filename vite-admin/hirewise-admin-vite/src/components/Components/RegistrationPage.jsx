@@ -475,7 +475,7 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
                         animation: 'spin 0.6s linear infinite',
                         marginRight: '8px',
                       }}></span>
-                      PROCESSING... (MAY TAKE UP TO 30 SECONDS)
+                      Creating your account...
                     </>
                   ) : (
                     <>
