@@ -1184,6 +1184,8 @@ const Experience = ({ formData, setFormData, onNext, onPrevious, onSaveExit }) =
           entryErrors.teachingStartDate = 'Start date is required';
         } else if (!/^\d{4}-\d{2}-\d{2}$/.test(exp.teachingStartDate)) {
           entryErrors.teachingStartDate = 'Please enter a valid date';
+        } else if (exp.teachingStartDate < '1950-01-01') {
+          entryErrors.teachingStartDate = 'Start date must be after 1950';
         } else if (exp.teachingStartDate > today) {
           entryErrors.teachingStartDate = 'Start date cannot be in the future';
         }
@@ -1191,6 +1193,8 @@ const Experience = ({ formData, setFormData, onNext, onPrevious, onSaveExit }) =
         if (exp.teachingEndDate) {
           if (!/^\d{4}-\d{2}-\d{2}$/.test(exp.teachingEndDate)) {
             entryErrors.teachingEndDate = 'Please enter a valid date';
+          } else if (exp.teachingEndDate < '1950-01-01') {
+            entryErrors.teachingEndDate = 'End date must be after 1950';
           } else if (exp.teachingEndDate > today) {
             entryErrors.teachingEndDate = 'End date cannot be in the future';
           }
@@ -1217,6 +1221,8 @@ const Experience = ({ formData, setFormData, onNext, onPrevious, onSaveExit }) =
           entryErrors.researchStartDate = 'Start date is required';
         } else if (!/^\d{4}-\d{2}-\d{2}$/.test(exp.researchStartDate)) {
           entryErrors.researchStartDate = 'Please enter a valid date';
+        } else if (exp.researchStartDate < '1950-01-01') {
+          entryErrors.researchStartDate = 'Start date must be after 1950';
         } else if (exp.researchStartDate > today) {
           entryErrors.researchStartDate = 'Start date cannot be in the future';
         }
@@ -1225,6 +1231,8 @@ const Experience = ({ formData, setFormData, onNext, onPrevious, onSaveExit }) =
           entryErrors.researchEndDate = 'End date is required';
         } else if (!/^\d{4}-\d{2}-\d{2}$/.test(exp.researchEndDate)) {
           entryErrors.researchEndDate = 'Please enter a valid date';
+        } else if (exp.researchEndDate < '1950-01-01') {
+          entryErrors.researchEndDate = 'End date must be after 1950';
         } else if (exp.researchEndDate > today) {
           entryErrors.researchEndDate = 'End date cannot be in the future';
         }
@@ -1376,6 +1384,7 @@ const Experience = ({ formData, setFormData, onNext, onPrevious, onSaveExit }) =
               id={`teachingStartDate${idx}`}
               name="teachingStartDate"
               value={exp.teachingStartDate}
+              min="1950-01-01"
               max={new Date().toISOString().split('T')[0]}
               onChange={(e) => handleTeachingChange(idx, e)}
               required
@@ -1391,6 +1400,7 @@ const Experience = ({ formData, setFormData, onNext, onPrevious, onSaveExit }) =
               id={`teachingEndDate${idx}`}
               name="teachingEndDate"
               value={exp.teachingEndDate}
+              min="1950-01-01"
               max={new Date().toISOString().split('T')[0]}
               onChange={(e) => handleTeachingChange(idx, e)}
             />
@@ -1515,6 +1525,7 @@ const Experience = ({ formData, setFormData, onNext, onPrevious, onSaveExit }) =
               id={`researchStartDate${idx}`}
               name="researchStartDate"
               value={exp.researchStartDate}
+              min="1950-01-01"
               max={new Date().toISOString().split('T')[0]}
               onChange={(e) => handleResearchChange(idx, e)}
               required
@@ -1530,6 +1541,7 @@ const Experience = ({ formData, setFormData, onNext, onPrevious, onSaveExit }) =
               id={`researchEndDate${idx}`}
               name="researchEndDate"
               value={exp.researchEndDate}
+              min="1950-01-01"
               max={new Date().toISOString().split('T')[0]}
               onChange={(e) => handleResearchChange(idx, e)}
               required
