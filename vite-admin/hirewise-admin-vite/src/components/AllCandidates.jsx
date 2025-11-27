@@ -17,11 +17,7 @@ const AllCandidates = () => {
   const [candidateToAssign, setCandidateToAssign] = useState(null);
   const [selectedFaculty, setSelectedFaculty] = useState(null);
   const [facultyMembers, setFacultyMembers] = useState([]);
-  const [assignments, setAssignments] = useState(() => {
-    // Load assignments from localStorage on mount
-    const saved = localStorage.getItem('facultyAssignments');
-    return saved ? JSON.parse(saved) : {};
-  });
+  const [assignments, setAssignments] = useState({});
 
   const departments = ['All', 'law', 'liberal', 'engineering', 'management'];
   
@@ -82,6 +78,15 @@ const AllCandidates = () => {
         candidate.status !== 'Deleted' &&
         candidate.status !== 'shortlisted'
       );
+      
+      // Build assignments object from database data
+      const assignmentsFromDB = {};
+      filteredData.forEach(candidate => {
+        if (candidate.assigned_faculty_id) {
+          assignmentsFromDB[candidate.id] = [candidate.assigned_faculty_id];
+        }
+      });
+      setAssignments(assignmentsFromDB);
       
       console.log('Fetched candidates:', data?.length, 'total, filtered to:', filteredData.length);
       console.log('All statuses in DB:', [...new Set(data?.map(c => c.status))]);
@@ -378,24 +383,42 @@ const AllCandidates = () => {
 
             <div className="flex space-x-3">
               <button
-                onClick={() => {
+                onClick={async () => {
                   if (selectedFaculty) {
                     const selectedFacultyName = facultyMembers.find(f => f.id === selectedFaculty)?.name;
+                    const selectedFacultyEmail = facultyMembers.find(f => f.id === selectedFaculty)?.email;
                     
-                    // Save assignment
-                    const newAssignments = {
-                      ...assignments,
-                      [candidateToAssign.id]: [selectedFaculty]
-                    };
-                    setAssignments(newAssignments);
-                    
-                    // Persist to localStorage
-                    localStorage.setItem('facultyAssignments', JSON.stringify(newAssignments));
-                    
-                    alert(`Assigned ${candidateToAssign.first_name} ${candidateToAssign.last_name} to: ${selectedFacultyName}`);
-                    setShowAssignModal(false);
-                    setCandidateToAssign(null);
-                    setSelectedFaculty(null);
+                    try {
+                      // Save assignment to Supabase database
+                      const { error } = await supabase
+                        .from('faculty_applications')
+                        .update({ 
+                          assigned_faculty_id: selectedFaculty,
+                          assigned_faculty_name: selectedFacultyName,
+                          assigned_faculty_email: selectedFacultyEmail
+                        })
+                        .eq('id', candidateToAssign.id);
+                      
+                      if (error) throw error;
+                      
+                      // Update local state
+                      const newAssignments = {
+                        ...assignments,
+                        [candidateToAssign.id]: [selectedFaculty]
+                      };
+                      setAssignments(newAssignments);
+                      
+                      alert(`Assigned ${candidateToAssign.first_name} ${candidateToAssign.last_name} to: ${selectedFacultyName}`);
+                      setShowAssignModal(false);
+                      setCandidateToAssign(null);
+                      setSelectedFaculty(null);
+                      
+                      // Refresh candidates list
+                      fetchCandidates();
+                    } catch (error) {
+                      console.error('Error assigning faculty:', error);
+                      alert('Failed to assign faculty. Please try again.');
+                    }
                   } else {
                     alert('Please select a faculty member');
                   }

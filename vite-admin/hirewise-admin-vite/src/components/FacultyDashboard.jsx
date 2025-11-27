@@ -22,39 +22,17 @@ const FacultyDashboard = () => {
     try {
       setLoading(true);
       
-      // Get assignments from localStorage
-      const facultyAssignments = JSON.parse(localStorage.getItem('facultyAssignments') || '{}');
+      // Fetch candidates assigned to this faculty from database
+      const { data, error } = await supabase
+        .from('faculty_applications')
+        .select('*')
+        .eq('assigned_faculty_id', facultyInfo.id)
+        .order('created_at', { ascending: false });
       
-      // Find candidate IDs assigned to this faculty
-      const assignedCandidateIds = [];
-      for (const [candidateId, facultyIds] of Object.entries(facultyAssignments)) {
-        if (facultyIds.includes(facultyInfo.id)) {
-          assignedCandidateIds.push(candidateId);
-        }
-      }
+      if (error) throw error;
       
-      if (assignedCandidateIds.length === 0) {
-        setCandidates([]);
-        setLoading(false);
-        return;
-      }
-      
-      // Fetch complete candidate data
-      const candidatesWithFullData = await Promise.all(
-        assignedCandidateIds.map(async (id) => {
-          try {
-            const data = await candidatesApi.getById(id);
-            return data;
-          } catch (error) {
-            console.error(`Error fetching candidate ${id}:`, error);
-            return null;
-          }
-        })
-      );
-      
-      // Filter out null values and rejected/shortlisted/deleted candidates
-      const validCandidates = candidatesWithFullData.filter(c => 
-        c !== null && 
+      // Filter out rejected/shortlisted/deleted candidates
+      const validCandidates = (data || []).filter(c => 
         c.status !== 'rejected' && 
         c.status !== 'deleted' && 
         c.status !== 'Deleted' &&
@@ -184,13 +162,6 @@ const FacultyDashboard = () => {
         
         if (statusErr) throw statusErr;
 
-        // Remove from localStorage assignments
-        const facultyAssignments = JSON.parse(localStorage.getItem('facultyAssignments') || '{}');
-        if (facultyAssignments[evaluationCandidate.id]) {
-          delete facultyAssignments[evaluationCandidate.id];
-          localStorage.setItem('facultyAssignments', JSON.stringify(facultyAssignments));
-        }
-
         // Remove from local state
         setCandidates(prev => prev.filter(c => c.id !== evaluationCandidate.id));
       }
@@ -228,13 +199,6 @@ const FacultyDashboard = () => {
         .update({ status: nextStatus })
         .eq('id', selectedCandidate.id);
       if (updErr) throw updErr;
-
-      // Remove from localStorage assignments
-      const facultyAssignments = JSON.parse(localStorage.getItem('facultyAssignments') || '{}');
-      if (facultyAssignments[selectedCandidate.id]) {
-        delete facultyAssignments[selectedCandidate.id];
-        localStorage.setItem('facultyAssignments', JSON.stringify(facultyAssignments));
-      }
 
       // Close modal first
       closeModal();
