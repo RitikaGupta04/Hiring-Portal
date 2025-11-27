@@ -69,17 +69,33 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
   // Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-    setTouched((prev) => ({ ...prev, [name]: true }));
-    setWarning({});
+    
+    // For name field, only allow letters and spaces
+    if (name === 'name') {
+      const filteredValue = value.replace(/[^a-zA-Z\s]/g, '');
+      setForm((prev) => ({ ...prev, [name]: filteredValue }));
+      setTouched((prev) => ({ ...prev, [name]: true }));
+      setWarning({});
+      
+      const validator = validate[name];
+      const newError = filteredValue && validator ? (!validator(filteredValue) ? errorMsg[name] : "") : "";
+      setFieldErrors((prev) => ({
+        ...prev,
+        [name]: newError,
+      }));
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+      setTouched((prev) => ({ ...prev, [name]: true }));
+      setWarning({});
 
-    // Ensure error value is a string, even if empty
-    const validator = validate[name];
-    const newError = value && validator ? (!validator(value) ? errorMsg[name] : "") : "";
-    setFieldErrors((prev) => ({
-      ...prev,
-      [name]: newError,
-    }));
+      // Ensure error value is a string, even if empty
+      const validator = validate[name];
+      const newError = value && validator ? (!validator(value) ? errorMsg[name] : "") : "";
+      setFieldErrors((prev) => ({
+        ...prev,
+        [name]: newError,
+      }));
+    }
 
     setGeneralFormError(""); // Clear general error on input change
   };
@@ -387,7 +403,7 @@ const RegistrationPage = ({ onRegistrationSuccess, onLoginSuccess }) => {
                 <div className="figma-form-group">
                   <label htmlFor="name" className="figma-label-blue">Full Name</label>
                   <div className={`figma-float-label ${form.name ? "filled" : ""}`}>
-                    <input className="figma-input" type="text" name="name" id="name" value={form.name} onChange={handleChange} onFocus={() => handleFocus("name")} autoComplete="new-password" placeholder=" " />
+                    <input className="figma-input" type="text" name="name" id="name" value={form.name} onChange={handleChange} onFocus={() => handleFocus("name")} autoComplete="new-password" placeholder=" " pattern="[a-zA-Z\s]+" title="Name should only contain letters and spaces" />
                   </div>
                   <div className="figma-warning">{warning.name && !isFieldEnabled("name") && "⚠ Please fill out the previous field first."}</div>
                   {touched.name && fieldErrors.name && typeof fieldErrors.name === 'string' && <div className="figma-error">{fieldErrors.name}</div>}
